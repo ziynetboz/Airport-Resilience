@@ -1,0 +1,38 @@
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.egg-info/
+dist/
+build/
+*.egg
+
+# Generated outputs (time-series and summary CSVs, plots)
+output/
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# R (if used alongside)
+.Rhistory
+.RData
+
+# Large or local-only files
+*.pdf
+*.dmg
+*.docx
+
+# Cursor / project metadata (optional)
+.cursor/

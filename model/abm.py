@@ -1,0 +1,75 @@
+"""
+Main agent-based model: orchestrates agents, scheduler, and data collection.
+"""
+
+from typing import Optional
+
+from mesa import Model
+
+from config.schema import SimulationConfig
+from agents import WeatherAgent, Airport, TravelerState
+from metrics.collectors import create_data_collector
+from .flight_scheduler import FlightScheduler
+from .step_runner import StepRunner
+
+
+class AirportABM(Model):
+    """
+    Airport under weather shocks (natural systems).
+    Tracks landings/takeoffs, travelers, and resilience metrics.
+    """
+
+    def __init__(self, config: SimulationConfig):
+        super().__init__(seed=config.seed)
+
+        self.weather = WeatherAgent(
+            self,
+            shock_at_step=config.shock_at_step,
+            shock_duration=config.shock_duration,
+        )
+
+        self.airport = Airport(
+            self,
+            runway_slots_per_step=config.runway_slots_per_step,
+            terminal_capacity=config.terminal_capacity,
+            n_gates=config.n_gates,
+            n_airlines=config.n_airlines,
+            taxi_in_steps=config.taxi_in_steps,
+            taxi_out_steps=config.taxi_out_steps,
+            disembark_steps=config.disembark_steps,
+            board_steps=config.board_steps,
+            gates_per_airline=config.gates_per_airline,
+        )
+
+        self.flights: list = []
+        self.travelers: list = []
+
+        self.flight_scheduler = FlightScheduler(
+            self,
+            flights_per_step=config.flights_per_step,
+            passengers_per_flight=config.passengers_per_flight,
+            airline_flight_share=config.airline_flight_share,
+        )
+        self.step_runner = StepRunner(self)
+        self.datacollector = create_data_collector()
+        self._config = config
+
+    @property
+    def current_step(self) -> int:
+        return self.steps
+
+    @property
+    def n_steps(self) -> int:
+        return self._config.n_steps
+
+    def step(self) -> None:
+        self.step_runner.run_step()
+
+    def run_model(self) -> None:
+        for _ in range(self._config.n_steps - 1):
+            self.step()
+        self.step()
+
+    def get_time_series(self):
+        """Return collected data as a pandas DataFrame."""
+        return self.datacollector.get_model_vars_dataframe()

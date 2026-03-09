@@ -1,0 +1,18 @@
+{
+  "n_steps": 150,
+  "flights_per_step": 2.5,
+  "passengers_per_flight": [80, 150],
+  "runway_slots_per_step": 5,
+  "terminal_capacity": 5000,
+  "n_gates": 100,
+  "n_airlines": 3,
+  "gates_per_airline": [70, 15, 15],
+  "airline_flight_share": [0.8, 0.1, 0.1],
+  "taxi_in_steps": 3,
+  "taxi_out_steps": 3,
+  "disembark_steps": 3,
+  "board_steps": 3,
+  "seed": 42,
+  "shock_at_step": 60,
+  "shock_duration": 12
+}
