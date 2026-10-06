@@ -53,6 +53,13 @@ def get_default_config() -> ModelConfig:
         terminal_los_enabled=True,
         terminal_capacity_enforced=False,
         los_overcrowd_mct_penalty_steps=2,
+        baggage_enabled=True,
+        bags_per_passenger=1.0,
+        bag_unload_steps=2,
+        bag_transfer_steps=3,
+        bag_make_up_steps=2,
+        bag_claim_steps=2,
+        bag_hold_departure=True,
         seed=None,
     )
 

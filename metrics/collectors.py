@@ -46,6 +46,11 @@ def create_data_collector() -> DataCollector:
             "terminal_occupancy_ratio": lambda m: m.terminal_los.occupancy_ratio,
             "terminal_los": lambda m: m.terminal_los.los_code,
             "terminal_overcrowded": lambda m: 1 if m.terminal_los.overcrowded else 0,
+            "bags_in_process": lambda m: m.baggage_handling.bags_in_process(),
+            "bags_loaded": lambda m: m.baggage_handling.bags_loaded_this_step,
+            "bags_claimed": lambda m: m.baggage_handling.bags_claimed_this_step,
+            "mishandled_bags": lambda m: m.baggage_handling.mishandled_bags_this_step,
+            "bag_holds": lambda m: m.baggage_handling.bag_holds_this_step,
         }
     )
 

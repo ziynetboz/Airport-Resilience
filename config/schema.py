@@ -84,6 +84,14 @@ class ModelConfig:
     terminal_los_enabled: bool = True
     terminal_capacity_enforced: bool = False  # soft: defer terminal entry when overcrowded
     los_overcrowd_mct_penalty_steps: int = 2
+    # Phase E: baggage handling (transfer, make-up, claim)
+    baggage_enabled: bool = True
+    bags_per_passenger: float = 1.0
+    bag_unload_steps: int = 2
+    bag_transfer_steps: int = 3
+    bag_make_up_steps: int = 2
+    bag_claim_steps: int = 2
+    bag_hold_departure: bool = True  # hold pushback until bags loaded or mishandled
     seed: Optional[int] = None
 
 
@@ -140,6 +148,13 @@ class SimulationConfig:
     terminal_los_enabled: bool = True
     terminal_capacity_enforced: bool = False
     los_overcrowd_mct_penalty_steps: int = 2
+    baggage_enabled: bool = True
+    bags_per_passenger: float = 1.0
+    bag_unload_steps: int = 2
+    bag_transfer_steps: int = 3
+    bag_make_up_steps: int = 2
+    bag_claim_steps: int = 2
+    bag_hold_departure: bool = True
     seed: Optional[int] = None
     shock_at_step: Optional[int] = None
     shock_duration: int = 12
@@ -185,6 +200,13 @@ class SimulationConfig:
             terminal_los_enabled=model.terminal_los_enabled,
             terminal_capacity_enforced=model.terminal_capacity_enforced,
             los_overcrowd_mct_penalty_steps=model.los_overcrowd_mct_penalty_steps,
+            baggage_enabled=model.baggage_enabled,
+            bags_per_passenger=model.bags_per_passenger,
+            bag_unload_steps=model.bag_unload_steps,
+            bag_transfer_steps=model.bag_transfer_steps,
+            bag_make_up_steps=model.bag_make_up_steps,
+            bag_claim_steps=model.bag_claim_steps,
+            bag_hold_departure=model.bag_hold_departure,
             seed=model.seed,
             shock_at_step=shock.at_step if shock.enabled else None,
             shock_duration=shock.duration,

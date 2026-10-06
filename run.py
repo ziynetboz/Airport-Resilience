@@ -61,6 +61,10 @@ def run_simulation(
         ),
         "terminal_los_final": model.terminal_los.los_code,
         "terminal_occupancy_ratio_final": model.terminal_los.occupancy_ratio,
+        "mishandled_bags_total": model.baggage_handling.mishandled_bags_total,
+        "bag_holds_total": model.baggage_handling.bag_holds_total,
+        "transfer_bags_loaded": model.baggage_handling.transfer_success_count(),
+        "transfer_bags_mishandled": model.baggage_handling.transfer_mishandled_count(),
     }
     return model.get_time_series(), otp, irops
 

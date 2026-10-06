@@ -66,6 +66,13 @@ def simulation_config_from_dict(data: dict[str, Any]) -> SimulationConfig:
         los_overcrowd_mct_penalty_steps=int(
             data.get("los_overcrowd_mct_penalty_steps", 2)
         ),
+        baggage_enabled=bool(data.get("baggage_enabled", True)),
+        bags_per_passenger=float(data.get("bags_per_passenger", 1.0)),
+        bag_unload_steps=int(data.get("bag_unload_steps", 2)),
+        bag_transfer_steps=int(data.get("bag_transfer_steps", 3)),
+        bag_make_up_steps=int(data.get("bag_make_up_steps", 2)),
+        bag_claim_steps=int(data.get("bag_claim_steps", 2)),
+        bag_hold_departure=bool(data.get("bag_hold_departure", True)),
         seed=data.get("seed"),
         shock_at_step=data.get("shock_at_step"),
         shock_duration=int(data.get("shock_duration", 12)),

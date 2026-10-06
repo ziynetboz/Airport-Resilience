@@ -112,6 +112,8 @@ class FlightScheduler:
                     self.model._stochastic_inbound_holds.append(f)
             self.model.flights.append(f)
             self._create_travelers_for_flight(f, is_arrival, pax)
+            from agents.baggage_handling import create_baggage_for_stochastic_flight
+            create_baggage_for_stochastic_flight(self.model, f, is_arrival, pax)
 
         # Release stochastic arrivals whose ETA has arrived
         remaining = []

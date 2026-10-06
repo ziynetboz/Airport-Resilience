@@ -194,7 +194,7 @@ Phase A  Schedule + AircraftTurnaround + OTP metrics — **implemented** (see `d
 Phase B  InboundDelay + ATCFlowProgram + AirlineCancel/Recover — **implemented** (see `docs/INBOUND_DELAY_GDP_IROPS.md`)
 Phase C  GateAllocator (preferential/common-use/remote/compatibility) — **implemented** (see `docs/GATE_ALLOCATION.md`)
 Phase D  Connections (MCT) + terminal LoS — **implemented** (see `docs/CONNECTIONS_MCT_TERMINAL_LOS.md`)
-Phase E  BaggageHandling (transfer + make-up + claim)
+Phase E  BaggageHandling (transfer + make-up + claim) — **implemented** (see `docs/BAGGAGE_HANDLING.md`)
 Phase F  Optional: taxiway network, crew, curfew, multi-airport delay import
 ```
 

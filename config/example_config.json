@@ -33,6 +33,13 @@
   "terminal_los_enabled": true,
   "terminal_capacity_enforced": false,
   "los_overcrowd_mct_penalty_steps": 2,
+  "baggage_enabled": true,
+  "bags_per_passenger": 1.0,
+  "bag_unload_steps": 2,
+  "bag_transfer_steps": 3,
+  "bag_make_up_steps": 2,
+  "bag_claim_steps": 2,
+  "bag_hold_departure": true,
   "seed": 42,
   "shock_at_step": 60,
   "shock_duration": 12
