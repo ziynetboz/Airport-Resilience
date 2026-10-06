@@ -6,6 +6,7 @@ import random
 from typing import TYPE_CHECKING
 
 from config.schedule_mode import ScheduleMode
+from model.inbound_delay import draw_inbound_delay_steps
 
 if TYPE_CHECKING:
     from model.abm import AirportABM
@@ -35,17 +36,22 @@ class FlightScheduler:
             self._inject_stochastic_flights()
 
     def _activate_published_legs(self) -> None:
-        """Release inbound/outbound legs when STA, STD, and MGT allow."""
+        """
+        Release inbound when ETA is reached (STA + inbound delay).
+        Release outbound when STD and MGT allow.
+        """
         step = self.model.steps
         for ac in self.model.aircraft_rotations:
             inbound = ac.inbound_flight
-            if (
-                inbound is not None
-                and not ac.inbound_released
-                and step >= inbound.scheduled_time_step
-            ):
-                ac.inbound_released = True
-                self.model.airport.request_landing(inbound)
+            if inbound is not None and not ac.inbound_released:
+                ready = (
+                    inbound.eta_step
+                    if inbound.eta_step is not None
+                    else inbound.scheduled_time_step
+                )
+                if step >= ready:
+                    ac.inbound_released = True
+                    self.model.airport.request_landing(inbound)
 
             outbound = ac.outbound_flight
             if (
@@ -66,7 +72,6 @@ class FlightScheduler:
                 self.passengers_per_flight[1],
             )
             from agents.flight import Flight, FlightType
-            from agents.traveler import Traveler, TravelerState
 
             n_airlines = len(self.model.airport.gate_pool._airline_gates)
             if (
@@ -89,10 +94,29 @@ class FlightScheduler:
                 airline_id=airline_id,
             )
             f.scheduled_time_step = step
-            self.model.flights.append(f)
             if is_arrival:
-                self.model.airport.request_landing(f)
+                delay = draw_inbound_delay_steps(self.model._config)
+                f.inbound_delay_steps = delay
+                f.eta_step = step + delay
+                # Stochastic arrivals enter the landing stream at ETA via a hold flag
+                if delay <= 0:
+                    self.model.airport.request_landing(f)
+                else:
+                    self.model._stochastic_inbound_holds.append(f)
+            self.model.flights.append(f)
             self._create_travelers_for_flight(f, is_arrival, pax)
+
+        # Release stochastic arrivals whose ETA has arrived
+        remaining = []
+        for f in getattr(self.model, "_stochastic_inbound_holds", []):
+            if f.state.name == "CANCELLED":
+                continue
+            ready = f.eta_step if f.eta_step is not None else f.scheduled_time_step
+            if self.model.steps >= ready:
+                self.model.airport.request_landing(f)
+            else:
+                remaining.append(f)
+        self.model._stochastic_inbound_holds = remaining
 
     def _draw_flight_count(self) -> int:
         n_new = random.choices(

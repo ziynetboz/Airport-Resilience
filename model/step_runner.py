@@ -12,15 +12,28 @@ if TYPE_CHECKING:
 
 
 class StepRunner:
-    """Runs one simulation step: schedule flights, weather, flights, airport, travelers, collect."""
+    """
+    One simulation step:
+
+    1. Activate schedule / inject demand (STA/ETA/STD)
+    2. Weather (capacity)
+    3. Ground Delay Program (GDP / EDCT)
+    4. Airline Operations Control (IROPS cancellations)
+    5. Flight airside progress
+    6. Airport runway slots
+    7. Travelers
+    8. Data collection
+    """
 
     def __init__(self, model: "AirportABM"):
         self.model = model
 
     def run_step(self) -> None:
-        """Execute one time step in the correct order."""
+        self.model.airport.flights_cancelled_this_step = 0
         self.model.flight_scheduler.schedule_for_step()
         self.model.weather.step()
+        self.model.ground_delay_program.step()
+        self.model.airline_ops.step()
         self._step_flights()
         self.model.airport.step()
         self._step_travelers()

@@ -9,6 +9,9 @@ from .airport import Airport
 from .traveler import Traveler, TravelerState
 from .gate import Gate, GatePool
 from .aircraft import Aircraft
+from .ground_delay_program import GroundDelayProgram
+from .airline_ops import AirlineOperationsControl
+from .cancel_reason import CancelReason
 
 __all__ = [
     "WeatherAgent",
@@ -22,4 +25,7 @@ __all__ = [
     "Gate",
     "GatePool",
     "Aircraft",
+    "GroundDelayProgram",
+    "AirlineOperationsControl",
+    "CancelReason",
 ]

@@ -62,6 +62,15 @@ class ModelConfig:
     schedule_mode: ScheduleMode = ScheduleMode.PUBLISHED
     min_ground_time_steps: int = 9  # Minimum ground time (MGT) between on-block and off-block
     otp_on_time_tolerance_steps: int = 1  # OTP window in steps (discrete-time analog of OTP15)
+    # Phase B: inbound delay, Ground Delay Program (GDP), airline IROPS
+    inbound_delay_enabled: bool = True
+    inbound_delay_prob: float = 0.4
+    inbound_delay_mean_steps: float = 2.0
+    gdp_enabled: bool = True
+    gdp_capacity_threshold: float = 0.7
+    irops_enabled: bool = True
+    irops_cancel_delay_threshold_steps: int = 15
+    irops_max_cancels_per_step: int = 2
     seed: Optional[int] = None
 
 
@@ -100,6 +109,14 @@ class SimulationConfig:
     schedule_mode: ScheduleMode = ScheduleMode.PUBLISHED
     min_ground_time_steps: int = 9
     otp_on_time_tolerance_steps: int = 1
+    inbound_delay_enabled: bool = True
+    inbound_delay_prob: float = 0.4
+    inbound_delay_mean_steps: float = 2.0
+    gdp_enabled: bool = True
+    gdp_capacity_threshold: float = 0.7
+    irops_enabled: bool = True
+    irops_cancel_delay_threshold_steps: int = 15
+    irops_max_cancels_per_step: int = 2
     seed: Optional[int] = None
     shock_at_step: Optional[int] = None
     shock_duration: int = 12
@@ -127,6 +144,14 @@ class SimulationConfig:
             schedule_mode=model.schedule_mode,
             min_ground_time_steps=model.min_ground_time_steps,
             otp_on_time_tolerance_steps=model.otp_on_time_tolerance_steps,
+            inbound_delay_enabled=model.inbound_delay_enabled,
+            inbound_delay_prob=model.inbound_delay_prob,
+            inbound_delay_mean_steps=model.inbound_delay_mean_steps,
+            gdp_enabled=model.gdp_enabled,
+            gdp_capacity_threshold=model.gdp_capacity_threshold,
+            irops_enabled=model.irops_enabled,
+            irops_cancel_delay_threshold_steps=model.irops_cancel_delay_threshold_steps,
+            irops_max_cancels_per_step=model.irops_max_cancels_per_step,
             seed=model.seed,
             shock_at_step=shock.at_step if shock.enabled else None,
             shock_duration=shock.duration,

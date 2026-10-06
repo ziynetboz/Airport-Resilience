@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, List
 from agents.aircraft import Aircraft
 from agents.flight import Flight, FlightType
 from agents.traveler import Traveler, TravelerState
+from model.inbound_delay import draw_inbound_delay_steps
 
 if TYPE_CHECKING:
     from model.abm import AirportABM
@@ -63,6 +64,9 @@ def build_published_rotations(
             airline_id=airline_id,
         )
         inbound.scheduled_time_step = sta
+        inbound_delay = draw_inbound_delay_steps(config)
+        inbound.inbound_delay_steps = inbound_delay
+        inbound.eta_step = sta + inbound_delay
 
         outbound = Flight(
             model,

@@ -31,6 +31,10 @@ def create_data_collector() -> DataCollector:
             "travelers_exited_this_step": _travelers_exited_this_step,
             "otp_arrival_pct": _otp_arrival_pct,
             "otp_departure_pct": _otp_departure_pct,
+            "gdp_active": lambda m: 1 if m.ground_delay_program.is_active() else 0,
+            "edcts_assigned": lambda m: m.ground_delay_program.edcts_assigned_this_step,
+            "flights_held_for_edct": lambda m: m.ground_delay_program.flights_held_for_edct,
+            "airline_irops_cancels": lambda m: m.airline_ops.cancels_this_step,
         }
     )
 

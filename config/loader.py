@@ -44,6 +44,16 @@ def simulation_config_from_dict(data: dict[str, Any]) -> SimulationConfig:
         schedule_mode=ScheduleMode(data.get("schedule_mode", ScheduleMode.PUBLISHED.value)),
         min_ground_time_steps=int(data.get("min_ground_time_steps", 9)),
         otp_on_time_tolerance_steps=int(data.get("otp_on_time_tolerance_steps", 1)),
+        inbound_delay_enabled=bool(data.get("inbound_delay_enabled", True)),
+        inbound_delay_prob=float(data.get("inbound_delay_prob", 0.4)),
+        inbound_delay_mean_steps=float(data.get("inbound_delay_mean_steps", 2.0)),
+        gdp_enabled=bool(data.get("gdp_enabled", True)),
+        gdp_capacity_threshold=float(data.get("gdp_capacity_threshold", 0.7)),
+        irops_enabled=bool(data.get("irops_enabled", True)),
+        irops_cancel_delay_threshold_steps=int(
+            data.get("irops_cancel_delay_threshold_steps", 15)
+        ),
+        irops_max_cancels_per_step=int(data.get("irops_max_cancels_per_step", 2)),
         seed=data.get("seed"),
         shock_at_step=data.get("shock_at_step"),
         shock_duration=int(data.get("shock_duration", 12)),

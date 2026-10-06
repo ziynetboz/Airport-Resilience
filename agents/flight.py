@@ -4,7 +4,6 @@ Includes taxi time and gate occupancy.
 """
 
 from enum import Enum
-import random
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -55,6 +54,12 @@ class Flight:
         self.state = FlightState.SCHEDULED
         self.actual_arrival_step: int | None = None  # ATA (on-block at gate in this model)
         self.actual_departure_step: int | None = None  # ATD (takeoff from runway)
+        # ETA (Estimated Time of Arrival): when the arrival may request landing
+        self.eta_step: int | None = None
+        self.inbound_delay_steps: int = 0
+        # EDCT (Expect Departure Clearance Time) under Ground Delay Program (GDP)
+        self.edct_step: int | None = None
+        self.cancel_reason = None  # CancelReason when cancelled by airline IROPS
         self.queued_at_step: int | None = None
         self.completed_at_step: int | None = None
         self.cancelled_at_step: int | None = None
@@ -89,19 +94,8 @@ class Flight:
     def step(self) -> None:
         if self.state in (FlightState.COMPLETED, FlightState.CANCELLED):
             return
-        weather = self.model.weather
-        cancel_states = (
-            FlightState.IN_QUEUE, FlightState.EXECUTING,
-            FlightState.LANDED, FlightState.TAXIING_IN, FlightState.AT_GATE,
-            FlightState.TAXIING_OUT,
-        )
-        if self.state in cancel_states and random.random() < weather.cancel_probability():
-            self.state = FlightState.CANCELLED
-            self.cancelled_at_step = self.model.steps
-            if self.assigned_gate is not None:
-                self.model.airport.release_gate(self)
-                self.assigned_gate = None
-            return
+        # Cancellations are airline IROPS decisions (see AirlineOperationsControl),
+        # not random weather draws on individual flights.
         if self.state == FlightState.IN_QUEUE:
             self.delay_steps = self.model.steps - (
                 self.queued_at_step or self.scheduled_step
@@ -122,7 +116,6 @@ class Flight:
                 self.state = FlightState.AT_GATE
             return
 
-        airport = self.model.airport
         # Arrival: LANDED -> TAXIING_IN -> AT_GATE -> COMPLETED
         if self.state == FlightState.LANDED:
             self.taxi_in_remaining = airport.taxi_in_steps
@@ -161,7 +154,9 @@ class Flight:
                 self.state = FlightState.TAXIING_OUT
             return
         if self.state == FlightState.TAXIING_OUT:
-            self.taxi_out_remaining -= 1
+            if self.taxi_out_remaining > 0:
+                self.taxi_out_remaining -= 1
             if self.taxi_out_remaining <= 0:
-                airport.request_takeoff(self)
+                # GDP may assign EDCT before the flight joins the departure queue
+                self.model.ground_delay_program.release_or_hold_for_takeoff(self)
             return

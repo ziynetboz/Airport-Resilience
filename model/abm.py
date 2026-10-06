@@ -9,6 +9,8 @@ from mesa import Model
 from config.schema import SimulationConfig
 from config.schedule_mode import ScheduleMode
 from agents import WeatherAgent, Airport, TravelerState
+from agents.ground_delay_program import GroundDelayProgram
+from agents.airline_ops import AirlineOperationsControl
 from metrics.collectors import create_data_collector
 from .flight_scheduler import FlightScheduler
 from .published_schedule import build_published_rotations
@@ -46,6 +48,19 @@ class AirportABM(Model):
         self.flights: list = []
         self.travelers: list = []
         self.aircraft_rotations: list = []
+        self._stochastic_inbound_holds: list = []
+
+        self.ground_delay_program = GroundDelayProgram(
+            self,
+            enabled=config.gdp_enabled,
+            capacity_threshold=config.gdp_capacity_threshold,
+        )
+        self.airline_ops = AirlineOperationsControl(
+            self,
+            enabled=config.irops_enabled,
+            cancel_delay_threshold_steps=config.irops_cancel_delay_threshold_steps,
+            max_cancels_per_step=config.irops_max_cancels_per_step,
+        )
 
         if config.schedule_mode == ScheduleMode.PUBLISHED:
             self.aircraft_rotations = build_published_rotations(self, config)

@@ -85,7 +85,7 @@ class Airport:
 
     def step(self) -> None:
         self.flights_completed_this_step = 0
-        self.flights_cancelled_this_step = 0
+        # IROPS may already have incremented cancellations this step
         slots = self.effective_slots()
         for _ in range(slots):
             if not self.arrival_queue and not self.departure_queue:
@@ -101,7 +101,7 @@ class Airport:
             if use_arrival and self.arrival_queue:
                 f = self.arrival_queue.popleft()
                 if f.state == FlightState.CANCELLED:
-                    self.flights_cancelled_this_step += 1
+                    # Cancellation already counted by AirlineOperationsControl (IROPS)
                     continue
                 f.state = FlightState.EXECUTING
                 f.state = FlightState.LANDED  # Taxi in, gate, disembark before COMPLETED
@@ -109,7 +109,6 @@ class Airport:
             elif self.departure_queue:
                 f = self.departure_queue.popleft()
                 if f.state == FlightState.CANCELLED:
-                    self.flights_cancelled_this_step += 1
                     continue
                 f.state = FlightState.EXECUTING
                 f.completed_at_step = self.model.steps

@@ -35,6 +35,14 @@ def get_default_config() -> ModelConfig:
         schedule_mode=ScheduleMode.PUBLISHED,
         min_ground_time_steps=9,
         otp_on_time_tolerance_steps=1,
+        inbound_delay_enabled=True,
+        inbound_delay_prob=0.4,
+        inbound_delay_mean_steps=2.0,
+        gdp_enabled=True,
+        gdp_capacity_threshold=0.7,
+        irops_enabled=True,
+        irops_cancel_delay_threshold_steps=15,
+        irops_max_cancels_per_step=2,
         seed=None,
     )
 
@@ -86,25 +94,6 @@ def build_simulation_config(
     )
     cfg = SimulationConfig.from_model_and_shock(model, shock)
     if seed is not None:
-        return SimulationConfig(
-            n_steps=cfg.n_steps,
-            flights_per_step=cfg.flights_per_step,
-            passengers_per_flight=cfg.passengers_per_flight,
-            runway_slots_per_step=cfg.runway_slots_per_step,
-            terminal_capacity=cfg.terminal_capacity,
-            n_gates=cfg.n_gates,
-            n_airlines=cfg.n_airlines,
-            taxi_in_steps=cfg.taxi_in_steps,
-            taxi_out_steps=cfg.taxi_out_steps,
-            disembark_steps=cfg.disembark_steps,
-            board_steps=cfg.board_steps,
-            gates_per_airline=cfg.gates_per_airline,
-            airline_flight_share=cfg.airline_flight_share,
-            schedule_mode=cfg.schedule_mode,
-            min_ground_time_steps=cfg.min_ground_time_steps,
-            otp_on_time_tolerance_steps=cfg.otp_on_time_tolerance_steps,
-            seed=seed,
-            shock_at_step=cfg.shock_at_step,
-            shock_duration=cfg.shock_duration,
-        )
+        from .copy_config import copy_simulation_config
+        return copy_simulation_config(cfg, seed=seed)
     return cfg
