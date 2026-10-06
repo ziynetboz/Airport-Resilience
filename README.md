@@ -6,6 +6,7 @@ Agent-based model of **airport operations**, **traveler activities**, and **weat
 - [INPUTS_OUTPUTS.md](INPUTS_OUTPUTS.md) — Inputs (CLI, config file, parameters) and outputs (CSVs, plots)
 - [docs/MODEL_DOCUMENTATION.md](docs/MODEL_DOCUMENTATION.md) — Theoretical basis, assumptions, and implementation explanation
 - [ODD.md](ODD.md) — Full ODD (Overview, Design concepts, and Details) protocol description
+- [docs/REALISM_GAP_ANALYSIS.md](docs/REALISM_GAP_ANALYSIS.md) — Prioritized gaps for operational realism (gates, delays, cancellations, schedule, baggage)
 
 ## Design
 
