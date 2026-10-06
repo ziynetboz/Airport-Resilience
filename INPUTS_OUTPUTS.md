@@ -39,7 +39,7 @@ When `--config <path>` is used, the file can contain any of the following. All a
 | `terminal_capacity` | int | 5000 | Terminal capacity (informational; not enforced). |
 | `n_gates` | int | 100 | Total number of gates. |
 | `n_airlines` | int | 3 | Number of airlines. |
-| `gates_per_airline` | [int, ...] | [70, 15, 15] | Gates allocated to each airline (length = n_airlines). |
+| `gates_per_airline` | [int, ...] | [55, 12, 13] | Preferential gates per airline; remainder of `n_gates` are common-use. |
 | `airline_flight_share` | [float, ...] | [0.8, 0.1, 0.1] | Probability that a new flight is assigned to each airline (must sum to 1). |
 | `taxi_in_steps` | int | 3 | Steps to taxi from runway to gate (arrivals). |
 | `taxi_out_steps` | int | 3 | Steps to taxi from gate to runway (departures). |
@@ -56,6 +56,11 @@ When `--config <path>` is used, the file can contain any of the following. All a
 | `irops_enabled` | bool | true | Enable airline IROPS cancellations. |
 | `irops_cancel_delay_threshold_steps` | int | 15 | Cancel when projected delay ≥ this many steps. |
 | `irops_max_cancels_per_step` | int | 2 | Max airline cancellations per step. |
+| `n_remote_stands` | int | 10 | Remote stands (hardstands) beyond contact gates. |
+| `remote_bus_transfer_steps` | int | 2 | Bus transfer time added for remote stand occupancy / taxi-out. |
+| `widebody_share` | float | 0.15 | Share of flights that are widebody. |
+| `widebody_gate_share` | float | 0.25 | Share of stands that are widebody class. |
+| `gate_buffer_steps` | int | 1 | Minimum steps after release before reassignment. |
 | `seed` | int or null | null | Random seed (null = unspecified). |
 | `shock_at_step` | int or null | 60 | Step at which shock starts (null = no shock if using CLI --no-shock). |
 | `shock_duration` | int | 12 | Duration of shock in steps. |
@@ -97,6 +102,10 @@ One row per step (and per run if `--runs > 1`). Columns:
 | `edcts_assigned` | int | EDCTs assigned this step under GDP. |
 | `flights_held_for_edct` | int | Departures waiting for EDCT this step. |
 | `airline_irops_cancels` | int | Flights cancelled by airline IROPS this step. |
+| `preferential_assignments` | int | Preferential gate assignments this step. |
+| `common_use_assignments` | int | Common-use gate assignments this step. |
+| `remote_stand_assignments` | int | Remote stand assignments this step. |
+| `gate_holds` | int | Gate assignment failures this step (flight waits). |
 
 ### 2. Resilience metrics CSV (`--metrics`)
 
@@ -166,7 +175,7 @@ python run_batch.py [input_csv] [--time-series-csv PATH] [--summary-csv PATH] [-
 | `terminal_capacity` | int | 5000 | Terminal capacity (informational). |
 | `n_gates` | int | 100 | Total gates. |
 | `n_airlines` | int | 3 | Number of airlines. |
-| `gates_per_airline` | "a,b,c" | "70,15,15" | Gates per airline (length = n_airlines). |
+| `gates_per_airline` | "a,b,c" | "55,12,13" | Preferential gates per airline. |
 | `airline_flight_share` | "a,b,c" | "0.8,0.1,0.1" | Flight share per airline (sum = 1). |
 | `taxi_in_steps`, `taxi_out_steps`, `disembark_steps`, `board_steps` | int | 3 | Timing parameters. |
 | `seed_base` | int | 42 | Base random seed; runs use seed_base, seed_base+1, … |

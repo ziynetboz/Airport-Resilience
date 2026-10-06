@@ -54,6 +54,11 @@ def simulation_config_from_dict(data: dict[str, Any]) -> SimulationConfig:
             data.get("irops_cancel_delay_threshold_steps", 15)
         ),
         irops_max_cancels_per_step=int(data.get("irops_max_cancels_per_step", 2)),
+        n_remote_stands=int(data.get("n_remote_stands", 10)),
+        remote_bus_transfer_steps=int(data.get("remote_bus_transfer_steps", 2)),
+        widebody_share=float(data.get("widebody_share", 0.15)),
+        widebody_gate_share=float(data.get("widebody_gate_share", 0.25)),
+        gate_buffer_steps=int(data.get("gate_buffer_steps", 1)),
         seed=data.get("seed"),
         shock_at_step=data.get("shock_at_step"),
         shock_duration=int(data.get("shock_duration", 12)),

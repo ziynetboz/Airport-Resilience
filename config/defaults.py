@@ -43,6 +43,11 @@ def get_default_config() -> ModelConfig:
         irops_enabled=True,
         irops_cancel_delay_threshold_steps=15,
         irops_max_cancels_per_step=2,
+        n_remote_stands=10,
+        remote_bus_transfer_steps=2,
+        widebody_share=0.15,
+        widebody_gate_share=0.25,
+        gate_buffer_steps=1,
         seed=None,
     )
 

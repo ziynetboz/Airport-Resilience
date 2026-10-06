@@ -6,6 +6,8 @@ Includes taxi time and gate occupancy.
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from agents.gate_class import AircraftType, GateUseType
+
 if TYPE_CHECKING:
     from model.abm import AirportABM
 
@@ -39,6 +41,7 @@ class Flight:
         scheduled_step: int,
         passenger_count: int = 100,
         airline_id: int = 0,
+        aircraft_type: AircraftType = AircraftType.NARROWBODY,
     ):
         Flight._next_id += 1
         self.unique_id = f"flight_{Flight._next_id}"
@@ -49,6 +52,7 @@ class Flight:
         self.scheduled_time_step = scheduled_step
         self.passenger_count = passenger_count
         self.airline_id = airline_id
+        self.aircraft_type = aircraft_type
         self.aircraft_registration: str | None = None
         self.aircraft = None  # Aircraft rotation, if any
         self.state = FlightState.SCHEDULED
@@ -66,6 +70,7 @@ class Flight:
         self.delay_steps = 0
         # Taxi and gate
         self.assigned_gate = None
+        self.gate_use_type: GateUseType | None = None
         self.taxi_in_remaining: int = 0
         self.taxi_out_remaining: int = 0
         self.gate_occupancy_remaining: int = 0
@@ -77,19 +82,38 @@ class Flight:
         if self.flight_type == FlightType.ARRIVAL:
             if self.actual_arrival_step is not None:
                 return max(0, self.actual_arrival_step - sched)
-            if self.state in (FlightState.IN_QUEUE, FlightState.EXECUTING, FlightState.LANDED,
-                              FlightState.TAXIING_IN, FlightState.AT_GATE):
+            if self.state in (
+                FlightState.IN_QUEUE,
+                FlightState.EXECUTING,
+                FlightState.LANDED,
+                FlightState.TAXIING_IN,
+                FlightState.AT_GATE,
+            ):
                 return max(0, self.model.steps - sched)
         else:
             if self.actual_departure_step is not None:
                 return max(0, self.actual_departure_step - sched)
-            if self.state not in (FlightState.SCHEDULED, FlightState.COMPLETED, FlightState.CANCELLED):
+            if self.state not in (
+                FlightState.SCHEDULED,
+                FlightState.COMPLETED,
+                FlightState.CANCELLED,
+            ):
                 return max(0, self.model.steps - sched)
         return self.delay_steps
 
     @property
     def delay(self) -> int:
         return self.delay_steps_vs_schedule
+
+    def _occupy_gate(self, gate, occupancy_steps: int) -> None:
+        gate.occupied_by = self
+        self.assigned_gate = gate
+        self.gate_use_type = gate.use_type
+        extra = 0
+        if gate.use_type == GateUseType.REMOTE_STAND:
+            extra = self.model._config.remote_bus_transfer_steps
+        self.gate_occupancy_remaining = occupancy_steps + extra
+        self.state = FlightState.AT_GATE
 
     def step(self) -> None:
         if self.state in (FlightState.COMPLETED, FlightState.CANCELLED):
@@ -108,12 +132,9 @@ class Flight:
         if self.state == FlightState.SCHEDULED and self.flight_type == FlightType.DEPARTURE:
             if self.aircraft is not None and not self.aircraft.outbound_released:
                 return
-            gate = airport.request_gate(self.airline_id)
+            gate = airport.request_gate(self.airline_id, self.aircraft_type)
             if gate is not None:
-                gate.occupied_by = self
-                self.assigned_gate = gate
-                self.gate_occupancy_remaining = airport.board_steps
-                self.state = FlightState.AT_GATE
+                self._occupy_gate(gate, airport.board_steps)
             return
 
         # Arrival: LANDED -> TAXIING_IN -> AT_GATE -> COMPLETED
@@ -124,12 +145,9 @@ class Flight:
         if self.state == FlightState.TAXIING_IN:
             self.taxi_in_remaining -= 1
             if self.taxi_in_remaining <= 0:
-                gate = airport.request_gate(self.airline_id)
+                gate = airport.request_gate(self.airline_id, self.aircraft_type)
                 if gate is not None:
-                    gate.occupied_by = self
-                    self.assigned_gate = gate
-                    self.gate_occupancy_remaining = airport.disembark_steps
-                    self.state = FlightState.AT_GATE
+                    self._occupy_gate(gate, airport.disembark_steps)
             return
         if self.state == FlightState.AT_GATE and self.flight_type == FlightType.ARRIVAL:
             self.gate_occupancy_remaining -= 1
@@ -150,7 +168,10 @@ class Flight:
             if self.gate_occupancy_remaining <= 0:
                 airport.release_gate(self)
                 self.assigned_gate = None
-                self.taxi_out_remaining = airport.taxi_out_steps
+                taxi = airport.taxi_out_steps
+                if self.gate_use_type == GateUseType.REMOTE_STAND:
+                    taxi += self.model._config.remote_bus_transfer_steps
+                self.taxi_out_remaining = taxi
                 self.state = FlightState.TAXIING_OUT
             return
         if self.state == FlightState.TAXIING_OUT:

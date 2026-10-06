@@ -12,6 +12,8 @@ from .aircraft import Aircraft
 from .ground_delay_program import GroundDelayProgram
 from .airline_ops import AirlineOperationsControl
 from .cancel_reason import CancelReason
+from .gate_class import AircraftType, GateClass, GateUseType
+from .gate_allocator import GateAllocator
 
 __all__ = [
     "WeatherAgent",
@@ -28,4 +30,8 @@ __all__ = [
     "GroundDelayProgram",
     "AirlineOperationsControl",
     "CancelReason",
+    "AircraftType",
+    "GateClass",
+    "GateUseType",
+    "GateAllocator",
 ]

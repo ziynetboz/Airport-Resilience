@@ -68,7 +68,7 @@ def row_to_config(row: pd.Series, default_cfg: SimulationConfig) -> SimulationCo
     disembark = int(get("disembark_steps", 3))
     board = int(get("board_steps", 3))
     gates_per_airline = _parse_tuple_int(
-        get("gates_per_airline", "70,15,15"), DEFAULT_GATES_PER_AIRLINE
+        get("gates_per_airline", "55,12,13"), DEFAULT_GATES_PER_AIRLINE
     )
     airline_flight_share = _parse_tuple_float(
         get("airline_flight_share", "0.8,0.1,0.1"), DEFAULT_AIRLINE_FLIGHT_SHARE
@@ -127,6 +127,15 @@ def row_to_config(row: pd.Series, default_cfg: SimulationConfig) -> SimulationCo
         irops_max_cancels_per_step=int(
             get("irops_max_cancels_per_step", default_cfg.irops_max_cancels_per_step)
         ),
+        n_remote_stands=int(get("n_remote_stands", default_cfg.n_remote_stands)),
+        remote_bus_transfer_steps=int(
+            get("remote_bus_transfer_steps", default_cfg.remote_bus_transfer_steps)
+        ),
+        widebody_share=float(get("widebody_share", default_cfg.widebody_share)),
+        widebody_gate_share=float(
+            get("widebody_gate_share", default_cfg.widebody_gate_share)
+        ),
+        gate_buffer_steps=int(get("gate_buffer_steps", default_cfg.gate_buffer_steps)),
         seed=seed_val,
         shock_at_step=shock_at,
         shock_duration=shock_duration,

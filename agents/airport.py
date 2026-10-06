@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from .flight import Flight, FlightState, FlightType
 from .gate import Gate, GatePool
+from .gate_class import AircraftType
 
 if TYPE_CHECKING:
     from model.abm import AirportABM
@@ -17,7 +18,7 @@ class Airport:
     """
     Runway and terminal. Allocates slots each step based on
     weather capacity factor; maintains arrival and departure queues.
-    Manages gate pool and taxi times.
+    Manages gate pool (preferential, common-use, remote stands) and taxi times.
     """
 
     def __init__(
@@ -32,6 +33,9 @@ class Airport:
         disembark_steps: int = 3,
         board_steps: int = 3,
         gates_per_airline: "tuple[int, ...] | None" = None,
+        n_remote_stands: int = 0,
+        widebody_gate_share: float = 0.25,
+        gate_buffer_steps: int = 0,
     ):
         self.model = model
         self.runway_slots_per_step = runway_slots_per_step
@@ -44,6 +48,9 @@ class Airport:
             n_gates=n_gates,
             n_airlines=n_airlines,
             gates_per_airline=gates_per_airline,
+            n_remote_stands=n_remote_stands,
+            widebody_gate_share=widebody_gate_share,
+            gate_buffer_steps=gate_buffer_steps,
         )
         self.arrival_queue: deque[Flight] = deque()
         self.departure_queue: deque[Flight] = deque()
@@ -75,13 +82,17 @@ class Airport:
         flight.queued_at_step = self.model.steps
         self.departure_queue.append(flight)
 
-    def request_gate(self, airline_id: int) -> "Gate | None":
-        """Assign an available gate to the airline. Returns None if none free."""
-        return self.gate_pool.request_gate(airline_id)
+    def request_gate(
+        self,
+        airline_id: int,
+        aircraft_type: AircraftType = AircraftType.NARROWBODY,
+    ) -> "Gate | None":
+        """Assign preferential → common-use → remote stand via GateAllocator."""
+        return self.model.gate_allocator.assign(airline_id, aircraft_type)
 
     def release_gate(self, flight: Flight) -> None:
-        """Release the gate occupied by the flight."""
-        self.gate_pool.release_gate(flight)
+        """Release the gate occupied by the flight (starts gate buffer)."""
+        self.gate_pool.release_gate(flight, current_step=self.model.steps)
 
     def step(self) -> None:
         self.flights_completed_this_step = 0

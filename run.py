@@ -47,6 +47,10 @@ def run_simulation(
         "gdp_edcts_assigned_total": sum(
             1 for f in model.flights if f.edct_step is not None
         ),
+        "preferential_assignments_total": model.gate_allocator.preferential_assignments,
+        "common_use_assignments_total": model.gate_allocator.common_use_assignments,
+        "remote_stand_assignments_total": model.gate_allocator.remote_stand_assignments,
+        "gate_holds_total": model.gate_allocator.gate_holds,
     }
     return model.get_time_series(), otp, irops
 
@@ -167,7 +171,7 @@ def main() -> Optional[pd.DataFrame]:
             print("\nOn-Time Performance (OTP) vs published schedule (run 0):")
             for k, v in otp.items():
                 print(f"  {k}: {v}")
-            print("\nInbound delay / GDP / airline IROPS (run 0):")
+            print("\nInbound delay / GDP / airline IROPS / gates (run 0):")
             for k, v in irops.items():
                 print(f"  {k}: {v}")
 

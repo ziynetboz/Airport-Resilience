@@ -72,8 +72,9 @@ class FlightScheduler:
                 self.passengers_per_flight[1],
             )
             from agents.flight import Flight, FlightType
+            from agents.gate_class import AircraftType
 
-            n_airlines = len(self.model.airport.gate_pool._airline_gates)
+            n_airlines = len(self.model.airport.gate_pool.preferential_gates)
             if (
                 self.airline_flight_share is not None
                 and len(self.airline_flight_share) == n_airlines
@@ -86,12 +87,18 @@ class FlightScheduler:
             else:
                 airline_id = random.randint(0, n_airlines - 1) if n_airlines > 0 else 0
             step = self.model.steps
+            aircraft_type = (
+                AircraftType.WIDEBODY
+                if random.random() < self.model._config.widebody_share
+                else AircraftType.NARROWBODY
+            )
             f = Flight(
                 self.model,
                 FlightType.ARRIVAL if is_arrival else FlightType.DEPARTURE,
                 step,
                 passenger_count=pax,
                 airline_id=airline_id,
+                aircraft_type=aircraft_type,
             )
             f.scheduled_time_step = step
             if is_arrival:
