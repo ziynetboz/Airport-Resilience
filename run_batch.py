@@ -12,6 +12,7 @@ from typing import Any, Optional
 import pandas as pd
 
 from config import get_default_config, SimulationConfig
+from config.schedule_mode import ScheduleMode
 from config.schema import DEFAULT_GATES_PER_AIRLINE, DEFAULT_AIRLINE_FLIGHT_SHARE
 from model import AirportABM
 from metrics import compute_resilience_metrics
@@ -84,6 +85,10 @@ def row_to_config(row: pd.Series, default_cfg: SimulationConfig) -> SimulationCo
         except (ValueError, TypeError):
             shock_at = 60
     shock_duration = int(get("shock_duration", 12))
+    schedule_mode_raw = str(get("schedule_mode", default_cfg.schedule_mode.value))
+    schedule_mode = ScheduleMode(schedule_mode_raw)
+    min_ground_time_steps = int(get("min_ground_time_steps", default_cfg.min_ground_time_steps))
+    otp_tol = int(get("otp_on_time_tolerance_steps", default_cfg.otp_on_time_tolerance_steps))
 
     return SimulationConfig(
         n_steps=n_steps,
@@ -99,6 +104,9 @@ def row_to_config(row: pd.Series, default_cfg: SimulationConfig) -> SimulationCo
         board_steps=board,
         gates_per_airline=gates_per_airline,
         airline_flight_share=airline_flight_share,
+        schedule_mode=schedule_mode,
+        min_ground_time_steps=min_ground_time_steps,
+        otp_on_time_tolerance_steps=otp_tol,
         seed=seed_val,
         shock_at_step=shock_at,
         shock_duration=shock_duration,
@@ -192,6 +200,9 @@ def main() -> None:
                 board_steps=config.board_steps,
                 gates_per_airline=config.gates_per_airline,
                 airline_flight_share=config.airline_flight_share,
+                schedule_mode=config.schedule_mode,
+                min_ground_time_steps=config.min_ground_time_steps,
+                otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
                 seed=seed_base + run,
                 shock_at_step=config.shock_at_step,
                 shock_duration=config.shock_duration,

@@ -4,6 +4,7 @@ Use these or override via config files / CLI.
 """
 
 from typing import Optional
+from .schedule_mode import ScheduleMode
 from .schema import (
     ModelConfig,
     WeatherConfig,
@@ -31,6 +32,9 @@ def get_default_config() -> ModelConfig:
         board_steps=3,
         gates_per_airline=DEFAULT_GATES_PER_AIRLINE,
         airline_flight_share=DEFAULT_AIRLINE_FLIGHT_SHARE,
+        schedule_mode=ScheduleMode.PUBLISHED,
+        min_ground_time_steps=9,
+        otp_on_time_tolerance_steps=1,
         seed=None,
     )
 
@@ -96,6 +100,9 @@ def build_simulation_config(
             board_steps=cfg.board_steps,
             gates_per_airline=cfg.gates_per_airline,
             airline_flight_share=cfg.airline_flight_share,
+            schedule_mode=cfg.schedule_mode,
+            min_ground_time_steps=cfg.min_ground_time_steps,
+            otp_on_time_tolerance_steps=cfg.otp_on_time_tolerance_steps,
             seed=seed,
             shock_at_step=cfg.shock_at_step,
             shock_duration=cfg.shock_duration,

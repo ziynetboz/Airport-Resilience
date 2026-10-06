@@ -5,6 +5,7 @@ Data collection: model reporters for time series and resilience analysis.
 from mesa.datacollection import DataCollector
 
 from agents import TravelerState
+from metrics.otp import compute_otp_metrics
 
 
 def create_data_collector() -> DataCollector:
@@ -28,6 +29,8 @@ def create_data_collector() -> DataCollector:
             "total_queue": lambda m: m.airport.total_queue_length(),
             "effective_slots": _effective_slots,
             "travelers_exited_this_step": _travelers_exited_this_step,
+            "otp_arrival_pct": _otp_arrival_pct,
+            "otp_departure_pct": _otp_departure_pct,
         }
     )
 
@@ -57,6 +60,23 @@ def _travelers_exited_this_step(model) -> int:
         and t.exited_at is not None
         and t.exited_at == model.steps
     )
+
+
+def _otp_snapshot(model) -> dict:
+    return compute_otp_metrics(
+        model.flights,
+        model._config.otp_on_time_tolerance_steps,
+    )
+
+
+def _otp_arrival_pct(model) -> float:
+    snap = _otp_snapshot(model)
+    return snap["otp_arrival_pct"] if snap["otp_arrival_pct"] is not None else float("nan")
+
+
+def _otp_departure_pct(model) -> float:
+    snap = _otp_snapshot(model)
+    return snap["otp_departure_pct"] if snap["otp_departure_pct"] is not None else float("nan")
 
 
 def _effective_slots(model) -> int:

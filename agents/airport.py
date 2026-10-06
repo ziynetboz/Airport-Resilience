@@ -113,6 +113,7 @@ class Airport:
                     continue
                 f.state = FlightState.EXECUTING
                 f.completed_at_step = self.model.steps
+                f.actual_departure_step = self.model.steps
                 f.state = FlightState.COMPLETED
                 self.flights_completed_this_step += 1
 

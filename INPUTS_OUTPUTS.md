@@ -45,6 +45,9 @@ When `--config <path>` is used, the file can contain any of the following. All a
 | `taxi_out_steps` | int | 3 | Steps to taxi from gate to runway (departures). |
 | `disembark_steps` | int | 3 | Steps at gate for disembarking (arrivals). |
 | `board_steps` | int | 3 | Steps at gate for boarding (departures). |
+| `schedule_mode` | string | `published` | `published` (STA/STD timetable + aircraft rotations) or `stochastic` (legacy injection). |
+| `min_ground_time_steps` | int | 9 | Minimum ground time (MGT) after on-block before off-block. |
+| `otp_on_time_tolerance_steps` | int | 1 | OTP on-time window in steps (vs STA/STD). |
 | `seed` | int or null | null | Random seed (null = unspecified). |
 | `shock_at_step` | int or null | 60 | Step at which shock starts (null = no shock if using CLI --no-shock). |
 | `shock_duration` | int | 12 | Duration of shock in steps. |
@@ -80,6 +83,8 @@ One row per step (and per run if `--runs > 1`). Columns:
 | `total_queue` | int | arrival_queue + departure_queue. |
 | `effective_slots` | int | Runway slots after weather scaling. |
 | `travelers_exited_this_step` | int | Travelers who exited the terminal this step. |
+| `otp_arrival_pct` | float | Cumulative OTP for arrivals (ATA vs STA) at this step. |
+| `otp_departure_pct` | float | Cumulative OTP for departures (ATD vs STD) at this step. |
 
 ### 2. Resilience metrics CSV (`--metrics`)
 

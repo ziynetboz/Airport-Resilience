@@ -46,9 +46,15 @@ class Flight:
         self.model = model
         self.flight_type = flight_type
         self.scheduled_step = scheduled_step
+        # STA for arrivals, STD for departures (published flight schedule)
+        self.scheduled_time_step = scheduled_step
         self.passenger_count = passenger_count
         self.airline_id = airline_id
+        self.aircraft_registration: str | None = None
+        self.aircraft = None  # Aircraft rotation, if any
         self.state = FlightState.SCHEDULED
+        self.actual_arrival_step: int | None = None  # ATA (on-block at gate in this model)
+        self.actual_departure_step: int | None = None  # ATD (takeoff from runway)
         self.queued_at_step: int | None = None
         self.completed_at_step: int | None = None
         self.cancelled_at_step: int | None = None
@@ -60,15 +66,25 @@ class Flight:
         self.gate_occupancy_remaining: int = 0
 
     @property
-    def delay(self) -> int:
-        if self.state == FlightState.COMPLETED and self.completed_at_step is not None:
-            return max(0, self.completed_at_step - self.scheduled_step - 1)
-        if self.state in (FlightState.IN_QUEUE, FlightState.EXECUTING):
-            return max(
-                0,
-                self.model.steps - (self.queued_at_step or self.scheduled_step),
-            )
+    def delay_steps_vs_schedule(self) -> int:
+        """Elapsed steps late versus STA or STD."""
+        sched = self.scheduled_time_step
+        if self.flight_type == FlightType.ARRIVAL:
+            if self.actual_arrival_step is not None:
+                return max(0, self.actual_arrival_step - sched)
+            if self.state in (FlightState.IN_QUEUE, FlightState.EXECUTING, FlightState.LANDED,
+                              FlightState.TAXIING_IN, FlightState.AT_GATE):
+                return max(0, self.model.steps - sched)
+        else:
+            if self.actual_departure_step is not None:
+                return max(0, self.actual_departure_step - sched)
+            if self.state not in (FlightState.SCHEDULED, FlightState.COMPLETED, FlightState.CANCELLED):
+                return max(0, self.model.steps - sched)
         return self.delay_steps
+
+    @property
+    def delay(self) -> int:
+        return self.delay_steps_vs_schedule
 
     def step(self) -> None:
         if self.state in (FlightState.COMPLETED, FlightState.CANCELLED):
@@ -96,6 +112,8 @@ class Flight:
 
         # Departure: SCHEDULED -> request gate -> AT_GATE -> TAXIING_OUT -> IN_QUEUE
         if self.state == FlightState.SCHEDULED and self.flight_type == FlightType.DEPARTURE:
+            if self.aircraft is not None and not self.aircraft.outbound_released:
+                return
             gate = airport.request_gate(self.airline_id)
             if gate is not None:
                 gate.occupied_by = self
@@ -127,6 +145,12 @@ class Flight:
                 self.assigned_gate = None
                 self.state = FlightState.COMPLETED
                 self.completed_at_step = self.model.steps
+                self.actual_arrival_step = self.model.steps
+                if self.aircraft is not None:
+                    self.aircraft.record_inbound_on_block(
+                        self.model.steps,
+                        self.model._config.min_ground_time_steps,
+                    )
             return
         if self.state == FlightState.AT_GATE and self.flight_type == FlightType.DEPARTURE:
             self.gate_occupancy_remaining -= 1

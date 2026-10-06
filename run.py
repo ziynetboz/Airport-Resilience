@@ -12,6 +12,7 @@ from config import get_default_config, SimulationConfig
 from config.defaults import build_simulation_config
 from model import AirportABM
 from metrics import compute_resilience_metrics
+from metrics.otp import compute_otp_metrics
 from viz import (
     export_time_series,
     export_metrics,
@@ -25,11 +26,15 @@ from viz import (
 
 def run_simulation(
     config: SimulationConfig,
-) -> pd.DataFrame:
-    """Run one simulation and return the time-series DataFrame."""
+) -> tuple[pd.DataFrame, dict]:
+    """Run one simulation; return time series and OTP (On-Time Performance) metrics."""
     model = AirportABM(config)
     model.run_model()
-    return model.get_time_series()
+    otp = compute_otp_metrics(
+        model.flights,
+        config.otp_on_time_tolerance_steps,
+    )
+    return model.get_time_series(), otp
 
 
 def parse_args():
@@ -113,6 +118,9 @@ def main() -> Optional[pd.DataFrame]:
             board_steps=config.board_steps,
             gates_per_airline=config.gates_per_airline,
             airline_flight_share=config.airline_flight_share,
+            schedule_mode=config.schedule_mode,
+            min_ground_time_steps=config.min_ground_time_steps,
+            otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
             seed=args.seed if config.seed is None else config.seed,
             shock_at_step=None if args.no_shock else (config.shock_at_step or args.shock_at),
             shock_duration=config.shock_duration,
@@ -140,6 +148,9 @@ def main() -> Optional[pd.DataFrame]:
             board_steps=config.board_steps,
             gates_per_airline=config.gates_per_airline,
             airline_flight_share=config.airline_flight_share,
+            schedule_mode=config.schedule_mode,
+            min_ground_time_steps=config.min_ground_time_steps,
+            otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
             seed=config.seed,
             shock_at_step=config.shock_at_step,
             shock_duration=config.shock_duration,
@@ -153,6 +164,7 @@ def main() -> Optional[pd.DataFrame]:
     )
 
     all_dfs = []
+    otp_by_run: list[dict] = []
     for i in range(args.runs):
         run_config = SimulationConfig(
             n_steps=config.n_steps,
@@ -168,13 +180,21 @@ def main() -> Optional[pd.DataFrame]:
             board_steps=config.board_steps,
             gates_per_airline=config.gates_per_airline,
             airline_flight_share=config.airline_flight_share,
+            schedule_mode=config.schedule_mode,
+            min_ground_time_steps=config.min_ground_time_steps,
+            otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
             seed=(config.seed or args.seed) + i,
             shock_at_step=config.shock_at_step,
             shock_duration=config.shock_duration,
         )
-        df = run_simulation(run_config)
+        df, otp = run_simulation(run_config)
         df["run"] = i
         all_dfs.append(df)
+        otp_by_run.append(otp)
+        if i == 0:
+            print("\nOn-Time Performance (OTP) vs published schedule (run 0):")
+            for k, v in otp.items():
+                print(f"  {k}: {v}")
 
     combined = pd.concat(all_dfs, ignore_index=True)
     metrics_df = None
@@ -193,6 +213,8 @@ def main() -> Optional[pd.DataFrame]:
                 shock_end_step=shock_end,
             )
             m["run"] = i
+            if i < len(otp_by_run):
+                m.update(otp_by_run[i])
             metrics_list.append(m)
         metrics_df = pd.DataFrame(metrics_list)
         print("\nResilience metrics (with shock):")
