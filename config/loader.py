@@ -59,6 +59,13 @@ def simulation_config_from_dict(data: dict[str, Any]) -> SimulationConfig:
         widebody_share=float(data.get("widebody_share", 0.15)),
         widebody_gate_share=float(data.get("widebody_gate_share", 0.25)),
         gate_buffer_steps=int(data.get("gate_buffer_steps", 1)),
+        connecting_passenger_share=float(data.get("connecting_passenger_share", 0.35)),
+        mct_steps=int(data.get("mct_steps", 6)),
+        terminal_los_enabled=bool(data.get("terminal_los_enabled", True)),
+        terminal_capacity_enforced=bool(data.get("terminal_capacity_enforced", False)),
+        los_overcrowd_mct_penalty_steps=int(
+            data.get("los_overcrowd_mct_penalty_steps", 2)
+        ),
         seed=data.get("seed"),
         shock_at_step=data.get("shock_at_step"),
         shock_duration=int(data.get("shock_duration", 12)),

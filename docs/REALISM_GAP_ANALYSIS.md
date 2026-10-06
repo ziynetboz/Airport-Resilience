@@ -193,7 +193,7 @@ Prioritized for **resilience accuracy** (not feature completeness):
 Phase A  Schedule + AircraftTurnaround + OTP metrics — **implemented** (see `docs/PUBLISHED_SCHEDULE_AND_OTP.md`)
 Phase B  InboundDelay + ATCFlowProgram + AirlineCancel/Recover — **implemented** (see `docs/INBOUND_DELAY_GDP_IROPS.md`)
 Phase C  GateAllocator (preferential/common-use/remote/compatibility) — **implemented** (see `docs/GATE_ALLOCATION.md`)
-Phase D  Connections (MCT) + terminal LoS
+Phase D  Connections (MCT) + terminal LoS — **implemented** (see `docs/CONNECTIONS_MCT_TERMINAL_LOS.md`)
 Phase E  BaggageHandling (transfer + make-up + claim)
 Phase F  Optional: taxiway network, crew, curfew, multi-airport delay import
 ```

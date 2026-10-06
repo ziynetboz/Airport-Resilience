@@ -15,6 +15,8 @@ from model import AirportABM
 from metrics import compute_resilience_metrics
 from metrics.otp import compute_otp_metrics
 from agents.cancel_reason import CancelReason
+from agents.passenger_type import PassengerType
+from agents.traveler import TravelerState
 from viz import (
     export_time_series,
     export_metrics,
@@ -51,6 +53,14 @@ def run_simulation(
         "common_use_assignments_total": model.gate_allocator.common_use_assignments,
         "remote_stand_assignments_total": model.gate_allocator.remote_stand_assignments,
         "gate_holds_total": model.gate_allocator.gate_holds,
+        "connecting_passengers": sum(
+            1 for t in model.travelers if t.passenger_type == PassengerType.CONNECTING
+        ),
+        "misconnects": sum(
+            1 for t in model.travelers if t.state == TravelerState.MISCONNECTED
+        ),
+        "terminal_los_final": model.terminal_los.los_code,
+        "terminal_occupancy_ratio_final": model.terminal_los.occupancy_ratio,
     }
     return model.get_time_series(), otp, irops
 
@@ -171,7 +181,7 @@ def main() -> Optional[pd.DataFrame]:
             print("\nOn-Time Performance (OTP) vs published schedule (run 0):")
             for k, v in otp.items():
                 print(f"  {k}: {v}")
-            print("\nInbound delay / GDP / airline IROPS / gates (run 0):")
+            print("\nInbound delay / GDP / IROPS / gates / MCT-LoS (run 0):")
             for k, v in irops.items():
                 print(f"  {k}: {v}")
 

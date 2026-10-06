@@ -78,6 +78,12 @@ class ModelConfig:
     widebody_share: float = 0.15
     widebody_gate_share: float = 0.25
     gate_buffer_steps: int = 1
+    # Phase D: connecting passengers (MCT) and terminal Level of Service (LoS)
+    connecting_passenger_share: float = 0.35
+    mct_steps: int = 6
+    terminal_los_enabled: bool = True
+    terminal_capacity_enforced: bool = False  # soft: defer terminal entry when overcrowded
+    los_overcrowd_mct_penalty_steps: int = 2
     seed: Optional[int] = None
 
 
@@ -129,6 +135,11 @@ class SimulationConfig:
     widebody_share: float = 0.15
     widebody_gate_share: float = 0.25
     gate_buffer_steps: int = 1
+    connecting_passenger_share: float = 0.35
+    mct_steps: int = 6
+    terminal_los_enabled: bool = True
+    terminal_capacity_enforced: bool = False
+    los_overcrowd_mct_penalty_steps: int = 2
     seed: Optional[int] = None
     shock_at_step: Optional[int] = None
     shock_duration: int = 12
@@ -169,6 +180,11 @@ class SimulationConfig:
             widebody_share=model.widebody_share,
             widebody_gate_share=model.widebody_gate_share,
             gate_buffer_steps=model.gate_buffer_steps,
+            connecting_passenger_share=model.connecting_passenger_share,
+            mct_steps=model.mct_steps,
+            terminal_los_enabled=model.terminal_los_enabled,
+            terminal_capacity_enforced=model.terminal_capacity_enforced,
+            los_overcrowd_mct_penalty_steps=model.los_overcrowd_mct_penalty_steps,
             seed=model.seed,
             shock_at_step=shock.at_step if shock.enabled else None,
             shock_duration=shock.duration,

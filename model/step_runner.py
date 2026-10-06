@@ -21,8 +21,9 @@ class StepRunner:
     4. Airline Operations Control (IROPS cancellations)
     5. Flight airside progress
     6. Airport runway slots
-    7. Travelers
-    8. Data collection
+    7. Travelers (connections / MCT)
+    8. Terminal Level of Service (LoS)
+    9. Data collection
     """
 
     def __init__(self, model: "AirportABM"):
@@ -38,6 +39,7 @@ class StepRunner:
         self._step_flights()
         self.model.airport.step()
         self._step_travelers()
+        self.model.terminal_los.step()
         self.model.datacollector.collect(self.model)
 
     def _step_flights(self) -> None:

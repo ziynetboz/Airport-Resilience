@@ -61,6 +61,11 @@ When `--config <path>` is used, the file can contain any of the following. All a
 | `widebody_share` | float | 0.15 | Share of flights that are widebody. |
 | `widebody_gate_share` | float | 0.25 | Share of stands that are widebody class. |
 | `gate_buffer_steps` | int | 1 | Minimum steps after release before reassignment. |
+| `connecting_passenger_share` | float | 0.35 | Share of inbound passengers who connect (rest terminating). |
+| `mct_steps` | int | 6 | Minimum Connection Time (MCT) in steps. |
+| `terminal_los_enabled` | bool | true | Track terminal Level of Service (LoS). |
+| `terminal_capacity_enforced` | bool | false | If true, defer terminal entry when overcrowded. |
+| `los_overcrowd_mct_penalty_steps` | int | 2 | Extra MCT steps when terminal overcrowded. |
 | `seed` | int or null | null | Random seed (null = unspecified). |
 | `shock_at_step` | int or null | 60 | Step at which shock starts (null = no shock if using CLI --no-shock). |
 | `shock_duration` | int | 12 | Duration of shock in steps. |
@@ -106,6 +111,11 @@ One row per step (and per run if `--runs > 1`). Columns:
 | `common_use_assignments` | int | Common-use gate assignments this step. |
 | `remote_stand_assignments` | int | Remote stand assignments this step. |
 | `gate_holds` | int | Gate assignment failures this step (flight waits). |
+| `travelers_misconnected` | int | Passengers who missed a connection (misconnect). |
+| `connecting_in_terminal` | int | Connecting passengers still in terminal / outbound. |
+| `terminal_occupancy_ratio` | float | Terminal occupancy / terminal capacity. |
+| `terminal_los` | string | Level of Service letter (A–F). |
+| `terminal_overcrowded` | 0/1 | 1 if occupancy exceeds terminal capacity. |
 
 ### 2. Resilience metrics CSV (`--metrics`)
 

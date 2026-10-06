@@ -14,6 +14,8 @@ from .airline_ops import AirlineOperationsControl
 from .cancel_reason import CancelReason
 from .gate_class import AircraftType, GateClass, GateUseType
 from .gate_allocator import GateAllocator
+from .passenger_type import PassengerType
+from .terminal_los import TerminalLoS, LevelOfService
 
 __all__ = [
     "WeatherAgent",
@@ -34,4 +36,7 @@ __all__ = [
     "GateClass",
     "GateUseType",
     "GateAllocator",
+    "PassengerType",
+    "TerminalLoS",
+    "LevelOfService",
 ]

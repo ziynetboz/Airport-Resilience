@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, List
 
 from agents.aircraft import Aircraft
 from agents.flight import Flight, FlightType
-from agents.traveler import Traveler, TravelerState
 from agents.gate_class import AircraftType
 from model.inbound_delay import draw_inbound_delay_steps
+from model.connections import create_travelers_for_rotation
 
 if TYPE_CHECKING:
     from model.abm import AirportABM
@@ -29,10 +29,9 @@ def build_published_rotations(
     """
     Pre-build inbound and outbound legs paired on the same aircraft registration.
 
-    - STA (Scheduled Time of Arrival) and STD (Scheduled Time of Departure) are
-      step indices in the published schedule.
-    - STD is at least STA + min_ground_time_steps (MGT).
-    - Inbound and outbound share the same aircraft type (narrowbody / widebody).
+    - STA / STD and MGT as before.
+    - After all legs exist, create terminating / connecting / originating passengers
+      using Minimum Connection Time (MCT).
     """
     n_airlines = config.n_airlines
     shares = config.airline_flight_share
@@ -95,26 +94,18 @@ def build_published_rotations(
         outbound.aircraft = ac
 
         model.flights.extend([inbound, outbound])
-        _create_travelers(model, inbound, outbound, pax_in, pax_out, sta, std)
         rotations.append(ac)
 
+    all_outbounds = [ac.outbound_flight for ac in rotations]
+    for ac in rotations:
+        create_travelers_for_rotation(
+            model,
+            config,
+            ac.inbound_flight,
+            ac.outbound_flight,
+            ac.inbound_flight.passenger_count,
+            ac.outbound_flight.passenger_count,
+            all_outbounds,
+        )
+
     return rotations
-
-
-def _create_travelers(
-    model: "AirportABM",
-    inbound: Flight,
-    outbound: Flight,
-    pax_in: int,
-    pax_out: int,
-    sta: int,
-    std: int,
-) -> None:
-    for _ in range(pax_in):
-        t = Traveler(model, arrival_flight=inbound)
-        model.travelers.append(t)
-    for _ in range(pax_out):
-        t = Traveler(model, arrival_flight=None, departure_flight=outbound)
-        t.state = TravelerState.IN_TERMINAL
-        t.entered_terminal_at = max(1, sta - random.randint(1, 20))
-        model.travelers.append(t)

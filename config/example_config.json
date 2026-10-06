@@ -28,6 +28,11 @@
   "widebody_share": 0.15,
   "widebody_gate_share": 0.25,
   "gate_buffer_steps": 1,
+  "connecting_passenger_share": 0.35,
+  "mct_steps": 6,
+  "terminal_los_enabled": true,
+  "terminal_capacity_enforced": false,
+  "los_overcrowd_mct_penalty_steps": 2,
   "seed": 42,
   "shock_at_step": 60,
   "shock_duration": 12

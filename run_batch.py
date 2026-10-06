@@ -136,6 +136,22 @@ def row_to_config(row: pd.Series, default_cfg: SimulationConfig) -> SimulationCo
             get("widebody_gate_share", default_cfg.widebody_gate_share)
         ),
         gate_buffer_steps=int(get("gate_buffer_steps", default_cfg.gate_buffer_steps)),
+        connecting_passenger_share=float(
+            get("connecting_passenger_share", default_cfg.connecting_passenger_share)
+        ),
+        mct_steps=int(get("mct_steps", default_cfg.mct_steps)),
+        terminal_los_enabled=bool(
+            get("terminal_los_enabled", default_cfg.terminal_los_enabled)
+        ),
+        terminal_capacity_enforced=bool(
+            get("terminal_capacity_enforced", default_cfg.terminal_capacity_enforced)
+        ),
+        los_overcrowd_mct_penalty_steps=int(
+            get(
+                "los_overcrowd_mct_penalty_steps",
+                default_cfg.los_overcrowd_mct_penalty_steps,
+            )
+        ),
         seed=seed_val,
         shock_at_step=shock_at,
         shock_duration=shock_duration,
