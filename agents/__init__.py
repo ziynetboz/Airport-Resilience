@@ -8,6 +8,7 @@ from .flight import Flight, FlightType, FlightState
 from .airport import Airport
 from .traveler import Traveler, TravelerState
 from .gate import Gate, GatePool
+from .aircraft import Aircraft
 
 __all__ = [
     "WeatherAgent",
@@ -20,4 +21,5 @@ __all__ = [
     "TravelerState",
     "Gate",
     "GatePool",
+    "Aircraft",
 ]

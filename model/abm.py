@@ -7,9 +7,11 @@ from typing import Optional
 from mesa import Model
 
 from config.schema import SimulationConfig
+from config.schedule_mode import ScheduleMode
 from agents import WeatherAgent, Airport, TravelerState
 from metrics.collectors import create_data_collector
 from .flight_scheduler import FlightScheduler
+from .published_schedule import build_published_rotations
 from .step_runner import StepRunner
 
 
@@ -43,12 +45,17 @@ class AirportABM(Model):
 
         self.flights: list = []
         self.travelers: list = []
+        self.aircraft_rotations: list = []
+
+        if config.schedule_mode == ScheduleMode.PUBLISHED:
+            self.aircraft_rotations = build_published_rotations(self, config)
 
         self.flight_scheduler = FlightScheduler(
             self,
             flights_per_step=config.flights_per_step,
             passengers_per_flight=config.passengers_per_flight,
             airline_flight_share=config.airline_flight_share,
+            schedule_mode=config.schedule_mode,
         )
         self.step_runner = StepRunner(self)
         self.datacollector = create_data_collector()

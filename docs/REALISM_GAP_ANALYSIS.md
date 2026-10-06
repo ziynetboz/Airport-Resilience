@@ -190,7 +190,7 @@ Prioritized for **resilience accuracy** (not feature completeness):
 ## Suggested module roadmap (implementation order)
 
 ```
-Phase A  Schedule + AircraftTurnaround + OTP metrics
+Phase A  Schedule + AircraftTurnaround + OTP metrics — **implemented** (see `docs/PUBLISHED_SCHEDULE_AND_OTP.md`)
 Phase B  InboundDelay + ATCFlowProgram + AirlineCancel/Recover
 Phase C  GateAllocator (preferential/common-use/remote/compatibility)
 Phase D  Connections (MCT) + terminal LoS

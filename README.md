@@ -7,6 +7,7 @@ Agent-based model of **airport operations**, **traveler activities**, and **weat
 - [docs/MODEL_DOCUMENTATION.md](docs/MODEL_DOCUMENTATION.md) — Theoretical basis, assumptions, and implementation explanation
 - [ODD.md](ODD.md) — Full ODD (Overview, Design concepts, and Details) protocol description
 - [docs/REALISM_GAP_ANALYSIS.md](docs/REALISM_GAP_ANALYSIS.md) — Prioritized gaps for operational realism (gates, delays, cancellations, schedule, baggage)
+- [docs/PUBLISHED_SCHEDULE_AND_OTP.md](docs/PUBLISHED_SCHEDULE_AND_OTP.md) — Published flight schedule, aircraft rotations (MGT), STA/STD, and OTP
 
 ## Design
 

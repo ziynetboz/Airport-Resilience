@@ -12,6 +12,9 @@
   "taxi_out_steps": 3,
   "disembark_steps": 3,
   "board_steps": 3,
+  "schedule_mode": "published",
+  "min_ground_time_steps": 9,
+  "otp_on_time_tolerance_steps": 1,
   "seed": 42,
   "shock_at_step": 60,
   "shock_duration": 12

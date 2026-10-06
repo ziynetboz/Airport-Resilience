@@ -1,17 +1,18 @@
 """
-Flight scheduling: creates new flights and travelers for each step.
-Single responsibility: turn model config and current step into new entities.
+Flight scheduling: stochastic injection or activation of a published flight schedule.
 """
 
 import random
 from typing import TYPE_CHECKING
+
+from config.schedule_mode import ScheduleMode
 
 if TYPE_CHECKING:
     from model.abm import AirportABM
 
 
 class FlightScheduler:
-    """Creates arrivals/departures and associated travelers each step."""
+    """Creates flights (stochastic) or activates scheduled legs (published)."""
 
     def __init__(
         self,
@@ -19,14 +20,44 @@ class FlightScheduler:
         flights_per_step: float = 2.0,
         passengers_per_flight: tuple[int, int] = (80, 150),
         airline_flight_share: "tuple[float, ...] | None" = None,
+        schedule_mode: ScheduleMode = ScheduleMode.PUBLISHED,
     ):
         self.model = model
         self.flights_per_step = flights_per_step
         self.passengers_per_flight = passengers_per_flight
         self.airline_flight_share = airline_flight_share
+        self.schedule_mode = schedule_mode
 
     def schedule_for_step(self) -> None:
-        """Create new flights and travelers for the current step."""
+        if self.schedule_mode == ScheduleMode.PUBLISHED:
+            self._activate_published_legs()
+        else:
+            self._inject_stochastic_flights()
+
+    def _activate_published_legs(self) -> None:
+        """Release inbound/outbound legs when STA, STD, and MGT allow."""
+        step = self.model.steps
+        for ac in self.model.aircraft_rotations:
+            inbound = ac.inbound_flight
+            if (
+                inbound is not None
+                and not ac.inbound_released
+                and step >= inbound.scheduled_time_step
+            ):
+                ac.inbound_released = True
+                self.model.airport.request_landing(inbound)
+
+            outbound = ac.outbound_flight
+            if (
+                outbound is not None
+                and ac.inbound_released
+                and not ac.outbound_released
+                and ac.outbound_may_start(step)
+            ):
+                ac.outbound_released = True
+
+    def _inject_stochastic_flights(self) -> None:
+        """Legacy Poisson-style demand (no published timetable)."""
         n_new = self._draw_flight_count()
         for _ in range(n_new):
             is_arrival = random.random() < 0.5
@@ -49,23 +80,21 @@ class FlightScheduler:
                 )[0]
             else:
                 airline_id = random.randint(0, n_airlines - 1) if n_airlines > 0 else 0
+            step = self.model.steps
             f = Flight(
                 self.model,
                 FlightType.ARRIVAL if is_arrival else FlightType.DEPARTURE,
-                self.model.steps,
+                step,
                 passenger_count=pax,
                 airline_id=airline_id,
             )
+            f.scheduled_time_step = step
             self.model.flights.append(f)
             if is_arrival:
                 self.model.airport.request_landing(f)
-            else:
-                # Departures request gate first (via Flight.step), then taxi out, then takeoff
-                pass
             self._create_travelers_for_flight(f, is_arrival, pax)
 
     def _draw_flight_count(self) -> int:
-        """Number of new flights this step (stochastic from flights_per_step)."""
         n_new = random.choices(
             [int(self.flights_per_step), int(self.flights_per_step) + 1],
             weights=[

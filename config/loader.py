@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Optional
 
+from .schedule_mode import ScheduleMode
 from .schema import (
     SimulationConfig,
     ModelConfig,
@@ -40,6 +41,9 @@ def simulation_config_from_dict(data: dict[str, Any]) -> SimulationConfig:
         board_steps=int(data.get("board_steps", 3)),
         gates_per_airline=tuple(gates) if gates else DEFAULT_GATES_PER_AIRLINE,
         airline_flight_share=tuple(shares) if shares else DEFAULT_AIRLINE_FLIGHT_SHARE,
+        schedule_mode=ScheduleMode(data.get("schedule_mode", ScheduleMode.PUBLISHED.value)),
+        min_ground_time_steps=int(data.get("min_ground_time_steps", 9)),
+        otp_on_time_tolerance_steps=int(data.get("otp_on_time_tolerance_steps", 1)),
         seed=data.get("seed"),
         shock_at_step=data.get("shock_at_step"),
         shock_duration=int(data.get("shock_duration", 12)),

@@ -6,6 +6,8 @@ Single source of truth for parameterization.
 from dataclasses import dataclass, field
 from typing import Tuple, Optional
 
+from .schedule_mode import ScheduleMode
+
 
 @dataclass(frozen=True)
 class WeatherConfig:
@@ -57,6 +59,9 @@ class ModelConfig:
     board_steps: int = 3
     gates_per_airline: Optional[Tuple[int, ...]] = DEFAULT_GATES_PER_AIRLINE  # If None, equal split
     airline_flight_share: Optional[Tuple[float, ...]] = DEFAULT_AIRLINE_FLIGHT_SHARE  # If None, uniform
+    schedule_mode: ScheduleMode = ScheduleMode.PUBLISHED
+    min_ground_time_steps: int = 9  # Minimum ground time (MGT) between on-block and off-block
+    otp_on_time_tolerance_steps: int = 1  # OTP window in steps (discrete-time analog of OTP15)
     seed: Optional[int] = None
 
 
@@ -92,6 +97,9 @@ class SimulationConfig:
     board_steps: int
     gates_per_airline: Optional[Tuple[int, ...]] = None  # If None, equal split
     airline_flight_share: Optional[Tuple[float, ...]] = None  # If None, uniform
+    schedule_mode: ScheduleMode = ScheduleMode.PUBLISHED
+    min_ground_time_steps: int = 9
+    otp_on_time_tolerance_steps: int = 1
     seed: Optional[int] = None
     shock_at_step: Optional[int] = None
     shock_duration: int = 12
@@ -116,6 +124,9 @@ class SimulationConfig:
             board_steps=model.board_steps,
             gates_per_airline=model.gates_per_airline,
             airline_flight_share=model.airline_flight_share,
+            schedule_mode=model.schedule_mode,
+            min_ground_time_steps=model.min_ground_time_steps,
+            otp_on_time_tolerance_steps=model.otp_on_time_tolerance_steps,
             seed=model.seed,
             shock_at_step=shock.at_step if shock.enabled else None,
             shock_duration=shock.duration,
