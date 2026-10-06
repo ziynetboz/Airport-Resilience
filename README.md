@@ -11,6 +11,7 @@ Agent-based model of **airport operations**, **traveler activities**, and **weat
 - [docs/INBOUND_DELAY_GDP_IROPS.md](docs/INBOUND_DELAY_GDP_IROPS.md) — Inbound delay (ETA), Ground Delay Program (GDP / EDCT), airline IROPS
 - [docs/GATE_ALLOCATION.md](docs/GATE_ALLOCATION.md) — Preferential / common-use gates, remote stands, gate class
 - [docs/CONNECTIONS_MCT_TERMINAL_LOS.md](docs/CONNECTIONS_MCT_TERMINAL_LOS.md) — Connecting passengers (MCT), misconnects, terminal Level of Service (LoS)
+- [docs/BAGGAGE_HANDLING.md](docs/BAGGAGE_HANDLING.md) — Transfer bags, make-up, claim, mishandled bags, bag-induced departure hold
 
 ## Design
 

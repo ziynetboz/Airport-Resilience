@@ -16,6 +16,9 @@ from .gate_class import AircraftType, GateClass, GateUseType
 from .gate_allocator import GateAllocator
 from .passenger_type import PassengerType
 from .terminal_los import TerminalLoS, LevelOfService
+from .bag_types import BagType, BagState
+from .baggage import BagBatch
+from .baggage_handling import BaggageHandling
 
 __all__ = [
     "WeatherAgent",
@@ -39,4 +42,8 @@ __all__ = [
     "PassengerType",
     "TerminalLoS",
     "LevelOfService",
+    "BagType",
+    "BagState",
+    "BagBatch",
+    "BaggageHandling",
 ]

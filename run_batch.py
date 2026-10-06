@@ -152,6 +152,13 @@ def row_to_config(row: pd.Series, default_cfg: SimulationConfig) -> SimulationCo
                 default_cfg.los_overcrowd_mct_penalty_steps,
             )
         ),
+        baggage_enabled=bool(get("baggage_enabled", default_cfg.baggage_enabled)),
+        bags_per_passenger=float(get("bags_per_passenger", default_cfg.bags_per_passenger)),
+        bag_unload_steps=int(get("bag_unload_steps", default_cfg.bag_unload_steps)),
+        bag_transfer_steps=int(get("bag_transfer_steps", default_cfg.bag_transfer_steps)),
+        bag_make_up_steps=int(get("bag_make_up_steps", default_cfg.bag_make_up_steps)),
+        bag_claim_steps=int(get("bag_claim_steps", default_cfg.bag_claim_steps)),
+        bag_hold_departure=bool(get("bag_hold_departure", default_cfg.bag_hold_departure)),
         seed=seed_val,
         shock_at_step=shock_at,
         shock_duration=shock_duration,

@@ -66,6 +66,13 @@ When `--config <path>` is used, the file can contain any of the following. All a
 | `terminal_los_enabled` | bool | true | Track terminal Level of Service (LoS). |
 | `terminal_capacity_enforced` | bool | false | If true, defer terminal entry when overcrowded. |
 | `los_overcrowd_mct_penalty_steps` | int | 2 | Extra MCT steps when terminal overcrowded. |
+| `baggage_enabled` | bool | true | Enable baggage handling module. |
+| `bags_per_passenger` | float | 1.0 | Bags created per passenger. |
+| `bag_unload_steps` | int | 2 | Steps to unload inbound bags. |
+| `bag_transfer_steps` | int | 3 | Transfer sort time for connecting bags. |
+| `bag_make_up_steps` | int | 2 | Departure make-up time. |
+| `bag_claim_steps` | int | 2 | Arrival claim time. |
+| `bag_hold_departure` | bool | true | Hold pushback until bags loaded or mishandled. |
 | `seed` | int or null | null | Random seed (null = unspecified). |
 | `shock_at_step` | int or null | 60 | Step at which shock starts (null = no shock if using CLI --no-shock). |
 | `shock_duration` | int | 12 | Duration of shock in steps. |
@@ -116,6 +123,11 @@ One row per step (and per run if `--runs > 1`). Columns:
 | `terminal_occupancy_ratio` | float | Terminal occupancy / terminal capacity. |
 | `terminal_los` | string | Level of Service letter (A–F). |
 | `terminal_overcrowded` | 0/1 | 1 if occupancy exceeds terminal capacity. |
+| `bags_in_process` | int | Bags still in unload / transfer / make-up / claim. |
+| `bags_loaded` | int | Bags loaded onto departures this step. |
+| `bags_claimed` | int | Bags claimed this step. |
+| `mishandled_bags` | int | Mishandled bags this step. |
+| `bag_holds` | int | Departures held for bags this step. |
 
 ### 2. Resilience metrics CSV (`--metrics`)
 

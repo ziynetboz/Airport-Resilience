@@ -11,6 +11,7 @@ from agents.ground_delay_program import GroundDelayProgram
 from agents.airline_ops import AirlineOperationsControl
 from agents.gate_allocator import GateAllocator
 from agents.terminal_los import TerminalLoS
+from agents.baggage_handling import BaggageHandling, create_baggage_from_travelers
 from metrics.collectors import create_data_collector
 from .flight_scheduler import FlightScheduler
 from .published_schedule import build_published_rotations
@@ -51,11 +52,13 @@ class AirportABM(Model):
 
         self.flights: list = []
         self.travelers: list = []
+        self.bags: list = []
         self.aircraft_rotations: list = []
         self._stochastic_inbound_holds: list = []
 
         self.gate_allocator = GateAllocator(self)
         self.terminal_los = TerminalLoS(self)
+        self.baggage_handling = BaggageHandling(self)
         self.ground_delay_program = GroundDelayProgram(
             self,
             enabled=config.gdp_enabled,
@@ -70,6 +73,7 @@ class AirportABM(Model):
 
         if config.schedule_mode == ScheduleMode.PUBLISHED:
             self.aircraft_rotations = build_published_rotations(self, config)
+            create_baggage_from_travelers(self, config)
 
         self.flight_scheduler = FlightScheduler(
             self,

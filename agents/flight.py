@@ -166,6 +166,12 @@ class Flight:
         if self.state == FlightState.AT_GATE and self.flight_type == FlightType.DEPARTURE:
             self.gate_occupancy_remaining -= 1
             if self.gate_occupancy_remaining <= 0:
+                # Hold pushback until departure bags are loaded (or mishandled)
+                if hasattr(self.model, "baggage_handling") and not (
+                    self.model.baggage_handling.departure_bags_ready(self)
+                ):
+                    self.gate_occupancy_remaining = 0
+                    return
                 airport.release_gate(self)
                 self.assigned_gate = None
                 taxi = airport.taxi_out_steps

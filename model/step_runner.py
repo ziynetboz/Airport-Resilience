@@ -19,11 +19,12 @@ class StepRunner:
     2. Weather (capacity)
     3. Ground Delay Program (GDP / EDCT)
     4. Airline Operations Control (IROPS cancellations)
-    5. Flight airside progress
-    6. Airport runway slots
-    7. Travelers (connections / MCT)
-    8. Terminal Level of Service (LoS)
-    9. Data collection
+    5. Baggage handling (unload / transfer / make-up / claim)
+    6. Flight airside progress
+    7. Airport runway slots
+    8. Travelers (connections / MCT)
+    9. Terminal Level of Service (LoS)
+    10. Data collection
     """
 
     def __init__(self, model: "AirportABM"):
@@ -36,6 +37,7 @@ class StepRunner:
         self.model.weather.step()
         self.model.ground_delay_program.step()
         self.model.airline_ops.step()
+        self.model.baggage_handling.step()
         self._step_flights()
         self.model.airport.step()
         self._step_travelers()
