@@ -10,6 +10,7 @@ Agent-based model of **airport operations**, **traveler activities**, and **weat
 - [docs/PUBLISHED_SCHEDULE_AND_OTP.md](docs/PUBLISHED_SCHEDULE_AND_OTP.md) — Published flight schedule, aircraft rotations (MGT), STA/STD, and OTP
 - [docs/INBOUND_DELAY_GDP_IROPS.md](docs/INBOUND_DELAY_GDP_IROPS.md) — Inbound delay (ETA), Ground Delay Program (GDP / EDCT), airline IROPS
 - [docs/GATE_ALLOCATION.md](docs/GATE_ALLOCATION.md) — Preferential / common-use gates, remote stands, gate class
+- [docs/CONNECTIONS_MCT_TERMINAL_LOS.md](docs/CONNECTIONS_MCT_TERMINAL_LOS.md) — Connecting passengers (MCT), misconnects, terminal Level of Service (LoS)
 
 ## Design
 

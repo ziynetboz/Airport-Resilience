@@ -142,15 +142,25 @@ class FlightScheduler:
         passenger_count: int,
     ) -> None:
         from agents.traveler import Traveler, TravelerState
+        from agents.passenger_type import PassengerType
 
         step = self.model.steps
         if is_arrival:
             for _ in range(passenger_count):
-                t = Traveler(self.model, arrival_flight=flight)
+                t = Traveler(
+                    self.model,
+                    arrival_flight=flight,
+                    passenger_type=PassengerType.TERMINATING,
+                )
                 self.model.travelers.append(t)
         else:
             for _ in range(passenger_count):
-                t = Traveler(self.model, arrival_flight=None, departure_flight=flight)
+                t = Traveler(
+                    self.model,
+                    arrival_flight=None,
+                    departure_flight=flight,
+                    passenger_type=PassengerType.ORIGINATING,
+                )
                 t.state = TravelerState.IN_TERMINAL
                 t.entered_terminal_at = step - random.randint(1, 20)
                 self.model.travelers.append(t)

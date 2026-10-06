@@ -41,13 +41,20 @@ def create_data_collector() -> DataCollector:
             "common_use_assignments": lambda m: m.gate_allocator.common_use_this_step,
             "remote_stand_assignments": lambda m: m.gate_allocator.remote_stand_this_step,
             "gate_holds": lambda m: m.gate_allocator.gate_holds_this_step,
+            "travelers_misconnected": _travelers_misconnected,
+            "connecting_in_terminal": _connecting_in_terminal,
+            "terminal_occupancy_ratio": lambda m: m.terminal_los.occupancy_ratio,
+            "terminal_los": lambda m: m.terminal_los.los_code,
+            "terminal_overcrowded": lambda m: 1 if m.terminal_los.overcrowded else 0,
         }
     )
 
 
 def _travelers_in_terminal(model) -> int:
     return sum(
-        1 for t in model.travelers if t.state == TravelerState.IN_TERMINAL
+        1
+        for t in model.travelers
+        if t.state in (TravelerState.IN_TERMINAL, TravelerState.OUTBOUND)
     )
 
 
@@ -55,9 +62,24 @@ def _travelers_stranded(model) -> int:
     return sum(
         1
         for t in model.travelers
-        if t.state == TravelerState.IN_TERMINAL
+        if t.state in (TravelerState.IN_TERMINAL, TravelerState.OUTBOUND)
         and t.departure_flight
         and t.departure_flight.state.name == "CANCELLED"
+    )
+
+
+def _travelers_misconnected(model) -> int:
+    return sum(1 for t in model.travelers if t.state == TravelerState.MISCONNECTED)
+
+
+def _connecting_in_terminal(model) -> int:
+    from agents.passenger_type import PassengerType
+
+    return sum(
+        1
+        for t in model.travelers
+        if t.passenger_type == PassengerType.CONNECTING
+        and t.state in (TravelerState.IN_TERMINAL, TravelerState.OUTBOUND)
     )
 
 
