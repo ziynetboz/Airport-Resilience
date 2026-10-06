@@ -8,6 +8,7 @@ Agent-based model of **airport operations**, **traveler activities**, and **weat
 - [ODD.md](ODD.md) — Full ODD (Overview, Design concepts, and Details) protocol description
 - [docs/REALISM_GAP_ANALYSIS.md](docs/REALISM_GAP_ANALYSIS.md) — Prioritized gaps for operational realism (gates, delays, cancellations, schedule, baggage)
 - [docs/PUBLISHED_SCHEDULE_AND_OTP.md](docs/PUBLISHED_SCHEDULE_AND_OTP.md) — Published flight schedule, aircraft rotations (MGT), STA/STD, and OTP
+- [docs/INBOUND_DELAY_GDP_IROPS.md](docs/INBOUND_DELAY_GDP_IROPS.md) — Inbound delay (ETA), Ground Delay Program (GDP / EDCT), airline IROPS
 
 ## Design
 

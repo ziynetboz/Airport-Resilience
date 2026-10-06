@@ -48,6 +48,14 @@ When `--config <path>` is used, the file can contain any of the following. All a
 | `schedule_mode` | string | `published` | `published` (STA/STD timetable + aircraft rotations) or `stochastic` (legacy injection). |
 | `min_ground_time_steps` | int | 9 | Minimum ground time (MGT) after on-block before off-block. |
 | `otp_on_time_tolerance_steps` | int | 1 | OTP on-time window in steps (vs STA/STD). |
+| `inbound_delay_enabled` | bool | true | Draw inbound delay so ETA may exceed STA. |
+| `inbound_delay_prob` | float | 0.4 | Probability an arrival has inbound delay. |
+| `inbound_delay_mean_steps` | float | 2.0 | Mean inbound delay (lognormal) in steps. |
+| `gdp_enabled` | bool | true | Enable Ground Delay Program (GDP / EDCT). |
+| `gdp_capacity_threshold` | float | 0.7 | GDP active when capacity factor ≤ this value. |
+| `irops_enabled` | bool | true | Enable airline IROPS cancellations. |
+| `irops_cancel_delay_threshold_steps` | int | 15 | Cancel when projected delay ≥ this many steps. |
+| `irops_max_cancels_per_step` | int | 2 | Max airline cancellations per step. |
 | `seed` | int or null | null | Random seed (null = unspecified). |
 | `shock_at_step` | int or null | 60 | Step at which shock starts (null = no shock if using CLI --no-shock). |
 | `shock_duration` | int | 12 | Duration of shock in steps. |
@@ -85,6 +93,10 @@ One row per step (and per run if `--runs > 1`). Columns:
 | `travelers_exited_this_step` | int | Travelers who exited the terminal this step. |
 | `otp_arrival_pct` | float | Cumulative OTP for arrivals (ATA vs STA) at this step. |
 | `otp_departure_pct` | float | Cumulative OTP for departures (ATD vs STD) at this step. |
+| `gdp_active` | 0/1 | 1 if Ground Delay Program is active this step. |
+| `edcts_assigned` | int | EDCTs assigned this step under GDP. |
+| `flights_held_for_edct` | int | Departures waiting for EDCT this step. |
+| `airline_irops_cancels` | int | Flights cancelled by airline IROPS this step. |
 
 ### 2. Resilience metrics CSV (`--metrics`)
 

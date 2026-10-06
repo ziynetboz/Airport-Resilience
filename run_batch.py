@@ -13,6 +13,7 @@ import pandas as pd
 
 from config import get_default_config, SimulationConfig
 from config.schedule_mode import ScheduleMode
+from config.copy_config import copy_simulation_config
 from config.schema import DEFAULT_GATES_PER_AIRLINE, DEFAULT_AIRLINE_FLIGHT_SHARE
 from model import AirportABM
 from metrics import compute_resilience_metrics
@@ -107,6 +108,25 @@ def row_to_config(row: pd.Series, default_cfg: SimulationConfig) -> SimulationCo
         schedule_mode=schedule_mode,
         min_ground_time_steps=min_ground_time_steps,
         otp_on_time_tolerance_steps=otp_tol,
+        inbound_delay_enabled=bool(get("inbound_delay_enabled", default_cfg.inbound_delay_enabled)),
+        inbound_delay_prob=float(get("inbound_delay_prob", default_cfg.inbound_delay_prob)),
+        inbound_delay_mean_steps=float(
+            get("inbound_delay_mean_steps", default_cfg.inbound_delay_mean_steps)
+        ),
+        gdp_enabled=bool(get("gdp_enabled", default_cfg.gdp_enabled)),
+        gdp_capacity_threshold=float(
+            get("gdp_capacity_threshold", default_cfg.gdp_capacity_threshold)
+        ),
+        irops_enabled=bool(get("irops_enabled", default_cfg.irops_enabled)),
+        irops_cancel_delay_threshold_steps=int(
+            get(
+                "irops_cancel_delay_threshold_steps",
+                default_cfg.irops_cancel_delay_threshold_steps,
+            )
+        ),
+        irops_max_cancels_per_step=int(
+            get("irops_max_cancels_per_step", default_cfg.irops_max_cancels_per_step)
+        ),
         seed=seed_val,
         shock_at_step=shock_at,
         shock_duration=shock_duration,
@@ -186,27 +206,7 @@ def main() -> None:
         runs_per = args.runs_per_scenario
 
         for run in range(runs_per):
-            run_config = SimulationConfig(
-                n_steps=config.n_steps,
-                flights_per_step=config.flights_per_step,
-                passengers_per_flight=config.passengers_per_flight,
-                runway_slots_per_step=config.runway_slots_per_step,
-                terminal_capacity=config.terminal_capacity,
-                n_gates=config.n_gates,
-                n_airlines=config.n_airlines,
-                taxi_in_steps=config.taxi_in_steps,
-                taxi_out_steps=config.taxi_out_steps,
-                disembark_steps=config.disembark_steps,
-                board_steps=config.board_steps,
-                gates_per_airline=config.gates_per_airline,
-                airline_flight_share=config.airline_flight_share,
-                schedule_mode=config.schedule_mode,
-                min_ground_time_steps=config.min_ground_time_steps,
-                otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
-                seed=seed_base + run,
-                shock_at_step=config.shock_at_step,
-                shock_duration=config.shock_duration,
-            )
+            run_config = copy_simulation_config(config, seed=seed_base + run)
             df = run_simulation(run_config)
             df["scenario_id"] = scenario_id
             df["run"] = run

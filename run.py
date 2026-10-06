@@ -10,9 +10,11 @@ import pandas as pd
 
 from config import get_default_config, SimulationConfig
 from config.defaults import build_simulation_config
+from config.copy_config import copy_simulation_config
 from model import AirportABM
 from metrics import compute_resilience_metrics
 from metrics.otp import compute_otp_metrics
+from agents.cancel_reason import CancelReason
 from viz import (
     export_time_series,
     export_metrics,
@@ -26,15 +28,36 @@ from viz import (
 
 def run_simulation(
     config: SimulationConfig,
-) -> tuple[pd.DataFrame, dict]:
-    """Run one simulation; return time series and OTP (On-Time Performance) metrics."""
+) -> tuple[pd.DataFrame, dict, dict]:
+    """Run one simulation; return time series, OTP, and IROPS summary."""
     model = AirportABM(config)
     model.run_model()
     otp = compute_otp_metrics(
         model.flights,
         config.otp_on_time_tolerance_steps,
     )
-    return model.get_time_series(), otp
+    irops = {
+        "airline_irops_cancellations": sum(
+            1
+            for f in model.flights
+            if f.state.name == "CANCELLED"
+            and f.cancel_reason == CancelReason.AIRLINE_IROPS
+        ),
+        "mean_inbound_delay_steps": _mean_inbound_delay(model),
+        "gdp_edcts_assigned_total": sum(
+            1 for f in model.flights if f.edct_step is not None
+        ),
+    }
+    return model.get_time_series(), otp, irops
+
+
+def _mean_inbound_delay(model) -> float:
+    delays = [
+        f.inbound_delay_steps
+        for f in model.flights
+        if f.flight_type.name == "ARRIVAL"
+    ]
+    return float(sum(delays) / len(delays)) if delays else 0.0
 
 
 def parse_args():
@@ -104,26 +127,11 @@ def main() -> Optional[pd.DataFrame]:
     if args.config is not None:
         from config.loader import load_simulation_config
         config = load_simulation_config(args.config)
-        config = SimulationConfig(
+        config = copy_simulation_config(
+            config,
             n_steps=args.steps if args.steps != 150 else config.n_steps,
-            flights_per_step=config.flights_per_step,
-            passengers_per_flight=config.passengers_per_flight,
-            runway_slots_per_step=config.runway_slots_per_step,
-            terminal_capacity=config.terminal_capacity,
-            n_gates=config.n_gates,
-            n_airlines=config.n_airlines,
-            taxi_in_steps=config.taxi_in_steps,
-            taxi_out_steps=config.taxi_out_steps,
-            disembark_steps=config.disembark_steps,
-            board_steps=config.board_steps,
-            gates_per_airline=config.gates_per_airline,
-            airline_flight_share=config.airline_flight_share,
-            schedule_mode=config.schedule_mode,
-            min_ground_time_steps=config.min_ground_time_steps,
-            otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
             seed=args.seed if config.seed is None else config.seed,
             shock_at_step=None if args.no_shock else (config.shock_at_step or args.shock_at),
-            shock_duration=config.shock_duration,
         )
     else:
         model_config = get_default_config()
@@ -134,27 +142,7 @@ def main() -> Optional[pd.DataFrame]:
             shock_duration=args.shock_duration,
             seed=args.seed,
         )
-        config = SimulationConfig(
-            n_steps=args.steps,
-            flights_per_step=config.flights_per_step,
-            passengers_per_flight=config.passengers_per_flight,
-            runway_slots_per_step=config.runway_slots_per_step,
-            terminal_capacity=config.terminal_capacity,
-            n_gates=config.n_gates,
-            n_airlines=config.n_airlines,
-            taxi_in_steps=config.taxi_in_steps,
-            taxi_out_steps=config.taxi_out_steps,
-            disembark_steps=config.disembark_steps,
-            board_steps=config.board_steps,
-            gates_per_airline=config.gates_per_airline,
-            airline_flight_share=config.airline_flight_share,
-            schedule_mode=config.schedule_mode,
-            min_ground_time_steps=config.min_ground_time_steps,
-            otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
-            seed=config.seed,
-            shock_at_step=config.shock_at_step,
-            shock_duration=config.shock_duration,
-        )
+        config = copy_simulation_config(config, n_steps=args.steps)
 
     shock_at = config.shock_at_step
     shock_end = (
@@ -166,34 +154,21 @@ def main() -> Optional[pd.DataFrame]:
     all_dfs = []
     otp_by_run: list[dict] = []
     for i in range(args.runs):
-        run_config = SimulationConfig(
-            n_steps=config.n_steps,
-            flights_per_step=config.flights_per_step,
-            passengers_per_flight=config.passengers_per_flight,
-            runway_slots_per_step=config.runway_slots_per_step,
-            terminal_capacity=config.terminal_capacity,
-            n_gates=config.n_gates,
-            n_airlines=config.n_airlines,
-            taxi_in_steps=config.taxi_in_steps,
-            taxi_out_steps=config.taxi_out_steps,
-            disembark_steps=config.disembark_steps,
-            board_steps=config.board_steps,
-            gates_per_airline=config.gates_per_airline,
-            airline_flight_share=config.airline_flight_share,
-            schedule_mode=config.schedule_mode,
-            min_ground_time_steps=config.min_ground_time_steps,
-            otp_on_time_tolerance_steps=config.otp_on_time_tolerance_steps,
+        run_config = copy_simulation_config(
+            config,
             seed=(config.seed or args.seed) + i,
-            shock_at_step=config.shock_at_step,
-            shock_duration=config.shock_duration,
         )
-        df, otp = run_simulation(run_config)
+        df, otp, irops = run_simulation(run_config)
         df["run"] = i
         all_dfs.append(df)
-        otp_by_run.append(otp)
+        merged = {**otp, **irops}
+        otp_by_run.append(merged)
         if i == 0:
             print("\nOn-Time Performance (OTP) vs published schedule (run 0):")
             for k, v in otp.items():
+                print(f"  {k}: {v}")
+            print("\nInbound delay / GDP / airline IROPS (run 0):")
+            for k, v in irops.items():
                 print(f"  {k}: {v}")
 
     combined = pd.concat(all_dfs, ignore_index=True)

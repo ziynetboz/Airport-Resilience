@@ -70,7 +70,12 @@ class WeatherAgent:
         return WEATHER_CAPACITY.get(self.condition, 1.0)
 
     def cancel_probability(self) -> float:
-        """Probability that an operation is cancelled this step."""
+        """
+        Legacy weather cancel probability.
+
+        Unused for flight cancellations as of Phase B: airlines cancel under
+        IROPS; weather only reduces capacity (and can trigger GDP).
+        """
         return WEATHER_CANCEL_PROB.get(self.condition, 0.0)
 
     def is_shock(self) -> bool:
