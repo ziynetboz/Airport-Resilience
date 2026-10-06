@@ -8,11 +8,18 @@ from typing import TYPE_CHECKING, List
 from agents.aircraft import Aircraft
 from agents.flight import Flight, FlightType
 from agents.traveler import Traveler, TravelerState
+from agents.gate_class import AircraftType
 from model.inbound_delay import draw_inbound_delay_steps
 
 if TYPE_CHECKING:
     from model.abm import AirportABM
     from config.schema import SimulationConfig
+
+
+def _draw_aircraft_type(config: "SimulationConfig") -> AircraftType:
+    if random.random() < config.widebody_share:
+        return AircraftType.WIDEBODY
+    return AircraftType.NARROWBODY
 
 
 def build_published_rotations(
@@ -25,6 +32,7 @@ def build_published_rotations(
     - STA (Scheduled Time of Arrival) and STD (Scheduled Time of Departure) are
       step indices in the published schedule.
     - STD is at least STA + min_ground_time_steps (MGT).
+    - Inbound and outbound share the same aircraft type (narrowbody / widebody).
     """
     n_airlines = config.n_airlines
     shares = config.airline_flight_share
@@ -47,6 +55,7 @@ def build_published_rotations(
             if weights
             else random.randint(0, n_airlines - 1)
         )
+        aircraft_type = _draw_aircraft_type(config)
         pax_in = random.randint(
             config.passengers_per_flight[0],
             config.passengers_per_flight[1],
@@ -62,6 +71,7 @@ def build_published_rotations(
             scheduled_step=sta,
             passenger_count=pax_in,
             airline_id=airline_id,
+            aircraft_type=aircraft_type,
         )
         inbound.scheduled_time_step = sta
         inbound_delay = draw_inbound_delay_steps(config)
@@ -74,6 +84,7 @@ def build_published_rotations(
             scheduled_step=std,
             passenger_count=pax_out,
             airline_id=airline_id,
+            aircraft_type=aircraft_type,
         )
         outbound.scheduled_time_step = std
 

@@ -2,15 +2,14 @@
 Main agent-based model: orchestrates agents, scheduler, and data collection.
 """
 
-from typing import Optional
-
 from mesa import Model
 
 from config.schema import SimulationConfig
 from config.schedule_mode import ScheduleMode
-from agents import WeatherAgent, Airport, TravelerState
+from agents import WeatherAgent, Airport
 from agents.ground_delay_program import GroundDelayProgram
 from agents.airline_ops import AirlineOperationsControl
+from agents.gate_allocator import GateAllocator
 from metrics.collectors import create_data_collector
 from .flight_scheduler import FlightScheduler
 from .published_schedule import build_published_rotations
@@ -25,6 +24,7 @@ class AirportABM(Model):
 
     def __init__(self, config: SimulationConfig):
         super().__init__(seed=config.seed)
+        self._config = config
 
         self.weather = WeatherAgent(
             self,
@@ -43,6 +43,9 @@ class AirportABM(Model):
             disembark_steps=config.disembark_steps,
             board_steps=config.board_steps,
             gates_per_airline=config.gates_per_airline,
+            n_remote_stands=config.n_remote_stands,
+            widebody_gate_share=config.widebody_gate_share,
+            gate_buffer_steps=config.gate_buffer_steps,
         )
 
         self.flights: list = []
@@ -50,6 +53,7 @@ class AirportABM(Model):
         self.aircraft_rotations: list = []
         self._stochastic_inbound_holds: list = []
 
+        self.gate_allocator = GateAllocator(self)
         self.ground_delay_program = GroundDelayProgram(
             self,
             enabled=config.gdp_enabled,
@@ -74,7 +78,6 @@ class AirportABM(Model):
         )
         self.step_runner = StepRunner(self)
         self.datacollector = create_data_collector()
-        self._config = config
 
     @property
     def current_step(self) -> int:

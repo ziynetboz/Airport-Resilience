@@ -38,8 +38,9 @@ class ShockConfig:
     duration: int = 12
 
 
-# Default gate and flight-share distribution (e.g. one dominant airline, two smaller)
-DEFAULT_GATES_PER_AIRLINE = (70, 15, 15)  # 100 gates total, 3 airlines
+# Preferential gates per airline; remainder of n_gates are common-use
+# Default: 80 preferential + 20 common-use when n_gates=100
+DEFAULT_GATES_PER_AIRLINE = (55, 12, 13)
 DEFAULT_AIRLINE_FLIGHT_SHARE = (0.8, 0.1, 0.1)
 
 
@@ -71,6 +72,12 @@ class ModelConfig:
     irops_enabled: bool = True
     irops_cancel_delay_threshold_steps: int = 15
     irops_max_cancels_per_step: int = 2
+    # Phase C: preferential / common-use / remote stands / gate class
+    n_remote_stands: int = 10
+    remote_bus_transfer_steps: int = 2
+    widebody_share: float = 0.15
+    widebody_gate_share: float = 0.25
+    gate_buffer_steps: int = 1
     seed: Optional[int] = None
 
 
@@ -117,6 +124,11 @@ class SimulationConfig:
     irops_enabled: bool = True
     irops_cancel_delay_threshold_steps: int = 15
     irops_max_cancels_per_step: int = 2
+    n_remote_stands: int = 10
+    remote_bus_transfer_steps: int = 2
+    widebody_share: float = 0.15
+    widebody_gate_share: float = 0.25
+    gate_buffer_steps: int = 1
     seed: Optional[int] = None
     shock_at_step: Optional[int] = None
     shock_duration: int = 12
@@ -152,6 +164,11 @@ class SimulationConfig:
             irops_enabled=model.irops_enabled,
             irops_cancel_delay_threshold_steps=model.irops_cancel_delay_threshold_steps,
             irops_max_cancels_per_step=model.irops_max_cancels_per_step,
+            n_remote_stands=model.n_remote_stands,
+            remote_bus_transfer_steps=model.remote_bus_transfer_steps,
+            widebody_share=model.widebody_share,
+            widebody_gate_share=model.widebody_gate_share,
+            gate_buffer_steps=model.gate_buffer_steps,
             seed=model.seed,
             shock_at_step=shock.at_step if shock.enabled else None,
             shock_duration=shock.duration,

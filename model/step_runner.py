@@ -30,6 +30,7 @@ class StepRunner:
 
     def run_step(self) -> None:
         self.model.airport.flights_cancelled_this_step = 0
+        self.model.gate_allocator.step()
         self.model.flight_scheduler.schedule_for_step()
         self.model.weather.step()
         self.model.ground_delay_program.step()

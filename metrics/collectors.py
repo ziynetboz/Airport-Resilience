@@ -23,8 +23,10 @@ def create_data_collector() -> DataCollector:
             "travelers_stranded": _travelers_stranded,
             "gates_available": lambda m: m.airport.gates_available(),
             "gate_utilization": lambda m: (
-                1 - m.airport.gates_available() / m._config.n_gates
-                if m._config.n_gates > 0 else 0.0
+                1 - m.airport.gates_available() / (
+                    m._config.n_gates + m._config.n_remote_stands
+                )
+                if (m._config.n_gates + m._config.n_remote_stands) > 0 else 0.0
             ),
             "total_queue": lambda m: m.airport.total_queue_length(),
             "effective_slots": _effective_slots,
@@ -35,6 +37,10 @@ def create_data_collector() -> DataCollector:
             "edcts_assigned": lambda m: m.ground_delay_program.edcts_assigned_this_step,
             "flights_held_for_edct": lambda m: m.ground_delay_program.flights_held_for_edct,
             "airline_irops_cancels": lambda m: m.airline_ops.cancels_this_step,
+            "preferential_assignments": lambda m: m.gate_allocator.preferential_this_step,
+            "common_use_assignments": lambda m: m.gate_allocator.common_use_this_step,
+            "remote_stand_assignments": lambda m: m.gate_allocator.remote_stand_this_step,
+            "gate_holds": lambda m: m.gate_allocator.gate_holds_this_step,
         }
     )
 
